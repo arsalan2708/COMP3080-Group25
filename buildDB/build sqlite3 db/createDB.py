@@ -1,9 +1,8 @@
-# import pyodbc #library required to run this
 import sqlite3
-# from build import create_projects as p, pop_projects as pp
-# from build import people , episodes, link, rate
+from build import create_projects as p, pop_projects as pp
+from build import people , episodes, link, rate
 
-dataPath = "../../"
+dataPath = "./"
 
 def buildDB(conn):
     p.create(conn)
