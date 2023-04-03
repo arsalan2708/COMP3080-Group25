@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request
 import sqlite3
 
-dbPath = './database/database.db'
+dbPath = '../database/database.db'
 
 app = Flask(__name__)
 
@@ -23,7 +23,7 @@ def searchBy():
     return genres
 
 
-@app.route('/getReq/<varb>')
+@app.route('/getReq/<varb>', methods=['POST'])
 def test(varb):
     print(f"test succ : got {varb}")
     return readInput(varb)
@@ -39,5 +39,5 @@ def readInput(input):
 
 
 
-app.run(debug=True)
+app.run(debug=True,port=2780)
 print("\nprogram execution complete!")
