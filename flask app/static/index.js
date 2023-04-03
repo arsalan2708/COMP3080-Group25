@@ -2,10 +2,9 @@ function init(){
 
     main = document.getElementById('main')
     main.addEventListener('change',()=>{
-        const hasSecond = document.querySelector('body').querySelector('#second') != null
-        if (hasSecond){
-            document.querySelector('body').removeChild(document.querySelector('#second'))
-        }
+        
+        removeSubSelects('second')
+        removeSubSelects ('third')
        
         if(main.value != 'people'){
             const secondSel = createSelection(main.value,'second', ['all','yearReleased','genre','rating'])
@@ -17,7 +16,7 @@ function init(){
             document.querySelector('body').append(secondSel)
             secondOnChange(secondSel)
         }else{
-            const secondSel = createSelection(main.value,'second', ['birthYear','isAlive','byAlphabet'])
+            const secondSel = createSelection(main.value,'second', ['all','birthYear','isAlive','byAlphabet','byProfession'])
             document.querySelector('body').append(secondSel)
             secondOnChange(secondSel)
         }
@@ -34,19 +33,36 @@ function createSelection(fr,id,selectVal){
 
     sel.innerHTML = '<option value="" selected disabled>---Select By---</option>'
         for (opt of selectVal){
-            console.log(opt)
-        sel.innerHTML += `<option id='${opt}'> ${opt} </option>`
-    }
+            sel.innerHTML += `<option id='${opt}'> ${opt} </option>`}
     
     return sel 
 }
 
 function secondOnChange(second){
     const main = document.querySelector('#main')
+    
+    second.addEventListener('change',()=>{
+        if (second.value == 'genre'){
+            load('getAllGenre').then((r)=>{
+                const sel = createSelection(second.value, 'third', r)
+                document.querySelector('body').append(sel)
 
-
-
+            } )
+    }
+});
+    
 }
+
+
+
+
+function removeSubSelects (id){
+    const hasChild = document.querySelector('body').querySelector(`#${id}`) != null
+        if (hasChild){
+            document.querySelector('body').removeChild(document.querySelector(`#${id}`))
+        }
+}
+
 
 
 function load(url) {
