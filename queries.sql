@@ -31,10 +31,10 @@ select title, ave()
 from ((titles T JOIN episodes E ON T.tconst = E.parent_tconst) join ratings R ON R.tconst=T.tconst) 
 order by title desc; 
 
---display top 10 highest rated tvShows 
+--display top 10 highest rated movie 
 select title, rating
-from ((titles T JOIN movies S ON T.tconst = S.tconst) join ratings R ON R.tconst = T.tconst)
-order by rating desc limit 10; 
+from ( (titles T JOIN movies S ON T.tconst = S.tconst) join ratings R ON R.tconst = T.tconst)
+order by rating desc LIMIT 10; 
 
 --display top 10 tvShows by genre 
 select title, rating, genre

@@ -66,10 +66,10 @@ function secondOnChange(second) {
 
 function processAllRequest(mValue) {
     const qry = {
-        titles: "titles where fType in ('movie','tvSeries')",
-        movies: "titles where fType in ('movie')",
-        tvSeries: "titles where fType in ('tvSeries')",
-        people: "people"
+        titles: "titles where fType in ('movie','tvSeries') order by startYear",
+        movies: "titles where fType in ('movie') order by startYear",
+        tvSeries: "titles where fType in ('tvSeries') order by startYear",
+        people: "people order by birthYear"
     };
 
     load(`/getAll/${qry[mValue]}`).then((res) => {
@@ -107,9 +107,11 @@ function createTable(info) {
     const tableBody = document.createElement('tbody')
 
     const header = info.shift()
-    header.unshift('rowNum')
+    header.unshift('#')
+    indexList = [...Array(header.length).keys()]
+    indexList.splice(1,1)
     var row = document.createElement('tr')
-    for (val of header) row.innerHTML += `<th>${val}</th>`
+    for (val of indexList) row.innerHTML += `<th>${header[val]}</th>`
     tableHead.append(row)
 
     let count = 0;
@@ -121,34 +123,38 @@ function createTable(info) {
     const slider = document.createElement('input')
     slider.setAttribute('type', 'range')
     slider.setAttribute('id', 'slider')
-    let min = 5 > info.length ? info.length : 5
+    let min = Math.min(5, info.length)
     let max = info.length
-    let currValue = Math.floor((max + min) / 3)
+    let currValue = Math.min(100,Math.floor((max + min) / 3))
     slider.max = max+1;
     slider.min = min-1;
     slider.value = currValue
 
-
+    
+    
     count = 0
     for (r of info) {
         row = document.createElement('tr')
-        for (c of r) row.innerHTML += `<td>${c}</td>`
+        for (c of indexList) row.innerHTML += `<td>${r[c]}</td>`
+        putLifeIn(row,r)
         tableBody.append(row)
         count++;
         if (count > slider.value) break;
     }
 
     slider.addEventListener('change', (e) => {
+        const len = indexList
         console.log(slider.value)
         const tableBody = document.querySelector('tbody')
         const newtBody = document.createElement('tbody')
         let count = 0
         for (r of info) {
             row = document.createElement('tr')
-            for (c of r) row.innerHTML += `<td>${c}</td>`
+            for (c of len) row.innerHTML += `<td>${r[c]}</td>`
+            putLifeIn(row,r)
             newtBody.append(row)
             count++;
-            if (count >= slider.value) break;
+            if (count > slider.value) break;
         }
 
         tableBody.replaceWith(newtBody)
@@ -158,6 +164,19 @@ function createTable(info) {
     currDiv.append(slider, table)
 }
 
+
+
+function putLifeIn(row,data){
+
+    row.addEventListener('click',()=>{
+        const d = data;
+        if(d[1].includes('nm')){
+            alert(`clicked: (${d[1]}) -> ${d[2]}`)
+        }else
+            alert(`clicked: (${d[1]}) -> ${d[3]}`)
+    })
+
+}
 
 
 
