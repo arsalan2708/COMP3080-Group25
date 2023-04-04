@@ -46,7 +46,9 @@
             font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
             font-size: .9em;
             min-width: 400px;
-            max-width: 80%;
+            max-width: 65%;
+            border-radius: 5px 5px 0 0;
+            overflow: hidden;
         }
 
         .qTable thead tr{
@@ -58,10 +60,24 @@
 
         .qTable th, .qTable td{padding: 12px 15px;}
 
-        .qTable tbody tr{ border-bottom: 1px solid #dddddd ;}
+        .qTable tbody tr{
+            font-size: .8em; 
+            border-bottom: 1px solid #dddddd ;
+            transition: .1s ease;
+        }
 
-        .qTable tbody tr:nth-of-type(even){ background-color: rgb(204, 240, 252);}
+        .qTable tbody tr:nth-of-type(even){ background-color: rgb(217, 234, 240);}
 
+        .qTable tbody tr:last-of-type{border-bottom: 2px solid rgb(0, 142, 185) ;}
+
+        .qTable tbody tr:hover{ background-color: #bd6458;
+            color: white;
+            cursor: pointer;
+            }
+
+        input[type=range]{
+            width: 75%;
+        }
     </style>
 </head>
 
