@@ -84,7 +84,19 @@ function processGorP(val1,val2, res){
     document.querySelector('.qSelects').append(sel)
 
     if(val2 == 'genre'){ //dealing with a movie,tvshow or both
+        sel.addEventListener('change',(e)=>{
+            const mValue = val1;
+            const reqVal =  e.target.value;
+            const q = `select tconst from genres where genre= '${reqVal}'`
+            const qry = {
+            titles: `titles where fType in ('movie','tvSeries') and tconst in (${q}) order by startYear`,
+            movies: `titles where fType in ('movie') and tconst in (${q}) order by startYear`,
+            tvSeries: `titles where fType in ('tvSeries') and tconst in (${q}) order by startYear`}
 
+            load(`/getAll/${qry[mValue]}`).then((res) => {
+                createTable(res)
+            })
+        })
     }else{ //dealing with people 
         sel.addEventListener('change',(e)=>{
             const reqVal =  e.target.value;
@@ -120,6 +132,12 @@ function emptyMainBody() {
 function createTable(info) {
     emptyMainBody()
     const currDiv = document.querySelector('.content')
+    
+    console.log(info)
+    if (info=='No result found'){
+        currDiv.append(document.createTextNode(info[0]+'!'))
+    }
+    else{
     const table = document.createElement('table')
     table.setAttribute('class', 'qTable')
 
@@ -183,6 +201,7 @@ function createTable(info) {
 
     table.append(tableHead, tableBody)
     currDiv.append(slider, table)
+}
 }
 
 
