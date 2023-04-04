@@ -7,7 +7,7 @@ function init() {
 
 
         if (main.value != 'people') {
-            const secondSel = createSelection(main.value, 'second', ['all', 'byTitle', 'yearReleased', 'genre', 'rating'])
+            const secondSel = createSelection(main.value, ['all', 'byTitle', 'yearReleased', 'genre', 'rating'])
 
             if (main.value == 'tvSeries') secondSel.innerHTML += '<option value="hasEnded">is Completed</option>'
             else if (main.value == 'movies') secondSel.innerHTML += '<option value="runTime">by Run-Time</option>'
@@ -16,7 +16,7 @@ function init() {
             secondOnChange(secondSel)
 
         } else {
-            const secondSel = createSelection(main.value, 'second', ['all', 'byName', 'birthYear', 'isAlive', 'byProfession'])
+            const secondSel = createSelection(main.value, ['all', 'byName', 'birthYear', 'isAlive', 'byProfession'])
             document.querySelector('.qSelects').append(secondSel)
             secondOnChange(secondSel)
         }
@@ -26,11 +26,10 @@ function init() {
 }
 
 
-function createSelection(fr, id, selectVal) {
+function createSelection(id, selectVal) {
     const sel = document.createElement('select')
     sel.setAttribute('id', id)
     sel.setAttribute('class', 'subSelection')
-    sel.selectionFor = fr;
 
     sel.innerHTML = '<option value="" selected disabled hidden>---Select By---</option>'
     for (opt of selectVal) {
@@ -48,20 +47,16 @@ function secondOnChange(second) {
         removeSubSelects('last')
         if (second.value == 'genre') {
             load('getAllGenre').then((r) => {
-                const sel = createSelection(second.value, 'third', r)
-                document.querySelector('.qSelects').append(sel)
-
+                processGorP(main.value,second.value,r)
             })
 
         }if (second.value == 'byProfession') {
             load('getProfessions').then((r) => {
-                const sel = createSelection(second.value, 'third', r)
-                document.querySelector('.qSelects').append(sel)
-
+                processGorP(main.value,second.value,r)
             })
 
         } else if (['byName', 'byTitle'].includes(second.value)) {
-            document.querySelector('.qSelects').append(createSelection(second.value, 'third', ['ascending', 'descending', 'startingWith']))
+            document.querySelector('.qSelects').append(createSelection(second.value, ['ascending', 'descending', 'startingWith']))
 
         } else if (second.value == 'all') {
             processAllRequest(main.value)
@@ -82,6 +77,24 @@ function processAllRequest(mValue) {
     load(`/getAll/${qry[mValue]}`).then((res) => {
         createTable(res)
     })
+}
+
+function processGorP(val1,val2, res){
+    const sel = createSelection(val2, res)
+    document.querySelector('.qSelects').append(sel)
+
+    if(val2 == 'genre'){ //dealing with a movie,tvshow or both
+
+    }else{ //dealing with people 
+        sel.addEventListener('change',(e)=>{
+            const reqVal =  e.target.value;
+            const q = `people where nconst in (select distinct nconst from profession where profession = '${reqVal}')`
+            load(`getAll/${q}`).then((res)=>{
+                createTable(res)
+            })
+        })
+    }
+
 }
 
 function removeSubSelects(amount) {
