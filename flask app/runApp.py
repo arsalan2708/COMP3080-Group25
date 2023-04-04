@@ -2,9 +2,9 @@ from flask import Flask, render_template, request
 import sqlite3
 import os
 
-print(os.getcwd())
 
-dbPath = 'file:./database/database.db?mode=ro'
+
+dbPath = 'file:../database/database.db?mode=ro'
 
 app = Flask(__name__)
 
@@ -13,10 +13,10 @@ def show_home():
     return render_template("index.html")
 
 @app.route('/getAllGenre', methods=["POST"])
-def searchBy():
+def getAllGenre():
     conn = sqlite3.connect(dbPath,uri=True)
     cursor = conn.cursor()
-    cursor.execute('select distinct genre from genres')
+    cursor.execute('select distinct genre from genres order by genre asc')
     
     genres = list()
 
@@ -25,6 +25,21 @@ def searchBy():
     
     conn.close()
     return genres
+
+
+@app.route('/getProfessions', methods=["POST"])
+def getProfessions():
+    conn = sqlite3.connect(dbPath,uri=True)
+    cursor = conn.cursor()
+    cursor.execute('select distinct profession from profession order by profession asc')
+    
+    proff = list()
+
+    for g in cursor.fetchall():
+        proff.append(g[0])
+    
+    conn.close()
+    return proff
 
 
 
@@ -60,6 +75,7 @@ def readInput(input):
 
 
 
-
+print(os.getcwd())
 app.run(debug=True,port=2780)
+
 print("\nprogram execution complete!")

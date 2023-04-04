@@ -53,6 +53,13 @@ function secondOnChange(second) {
 
             })
 
+        }if (second.value == 'byProfession') {
+            load('getProfessions').then((r) => {
+                const sel = createSelection(second.value, 'third', r)
+                document.querySelector('.qSelects').append(sel)
+
+            })
+
         } else if (['byName', 'byTitle'].includes(second.value)) {
             document.querySelector('.qSelects').append(createSelection(second.value, 'third', ['ascending', 'descending', 'startingWith']))
 
@@ -125,10 +132,11 @@ function createTable(info) {
     slider.setAttribute('id', 'slider')
     let min = Math.min(5, info.length)
     let max = info.length
-    let currValue = Math.min(100,Math.floor((max + min) / 3))
+    let currValue = Math.min(35,Math.floor((max + min) / 3))
     slider.max = max+1;
     slider.min = min-1;
     slider.value = currValue
+    slider.step = slider.min
 
     
     
