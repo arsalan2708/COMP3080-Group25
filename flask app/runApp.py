@@ -53,9 +53,11 @@ def test(varb):
         result = list()
         res = cursor.execute(f" select * from {varb}")
         names = [description[0] for description in cursor.description]
-    
-        if res.fetchone() is not None:
+
+        first = res.fetchone();
+        if first is not None:
             result.append(names)
+            result.append(first)
             for r in res.fetchall():
                 result.append(r)
         else:
@@ -64,6 +66,7 @@ def test(varb):
     except:
         result =  ['No result found'] , 400
     
+    print(result)
     return result
 
 

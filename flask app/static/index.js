@@ -70,7 +70,7 @@ function processAllRequest(mValue) {
     const qry = {
         titles: "titles where fType in ('movie','tvSeries') order by startYear",
         movies: "titles where fType in ('movie') order by startYear",
-        tvSeries: "titles where fType in ('tvSeries') order by startYear",
+        tvSeries: "titles where fType in ('tvSeries')",
         people: "people order by birthYear"
     };
 
@@ -133,11 +133,11 @@ function createTable(info) {
     emptyMainBody()
     const currDiv = document.querySelector('.content')
     
-    console.log(info)
     if (info=='No result found'){
         currDiv.append(document.createTextNode(info[0]+'!'))
     }
     else{
+    console.log(info)
     const table = document.createElement('table')
     table.setAttribute('class', 'qTable')
 
@@ -146,6 +146,7 @@ function createTable(info) {
 
     const header = info.shift()
     header.unshift('#')
+    console.log(info)
     indexList = [...Array(header.length).keys()]
     indexList.splice(1,1)
     var row = document.createElement('tr')
@@ -164,10 +165,10 @@ function createTable(info) {
     let min = Math.min(5, info.length)
     let max = info.length
     let currValue = Math.min(35,Math.floor((max + min) / 3))
-    slider.max = max+1;
-    slider.min = min-1;
+    slider.max = max;
+    slider.min = min;
     slider.value = currValue
-    slider.step = slider.min
+    slider.step = 1
 
     
     

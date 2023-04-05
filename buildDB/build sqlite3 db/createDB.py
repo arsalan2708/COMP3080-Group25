@@ -1,7 +1,9 @@
 import sqlite3
+import os
 from build import create_projects as p, pop_projects as pp
 from build import people , episodes, link, rate
 
+print(os.getcwd())
 dataPath = "./"
 
 def buildDB(conn):
