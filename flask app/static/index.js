@@ -10,7 +10,7 @@ function init() {
             const secondSel = createSelection(main.value, ['all', 'byTitle', 'yearReleased', 'genre', 'rating'])
 
             if (main.value == 'tvSeries') secondSel.innerHTML += '<option value="hasEnded">is Completed</option>'
-            else if (main.value == 'movies') secondSel.innerHTML += '<option value="runTime">by Run-Time</option>'
+            else if (main.value == 'movie') secondSel.innerHTML += '<option value="runTime">by Run-Time</option>'
 
             document.querySelector('.qSelects').append(secondSel)
             secondOnChange(secondSel)
@@ -49,14 +49,13 @@ function secondOnChange(second) {
             load('getAllGenre').then((r) => {
                 processGorP(main.value,second.value,r)
             })
-
         }if (second.value == 'byProfession') {
             load('getProfessions').then((r) => {
                 processGorP(main.value,second.value,r)
             })
 
         } else if (['byName', 'byTitle'].includes(second.value)) {
-            document.querySelector('.qSelects').append(createSelection(second.value, ['ascending', 'descending', 'startingWith']))
+            processbyTitleORbyName(main.value,second.value, createSelection(second.value, ['ascending', 'descending', 'startingWith']))
 
         } else if (second.value == 'all') {
             processAllRequest(main.value)
@@ -69,7 +68,7 @@ function secondOnChange(second) {
 function processAllRequest(mValue) {
     const qry = {
         titles: "titles where fType in ('movie','tvSeries') order by startYear",
-        movies: "titles where fType in ('movie') order by startYear",
+        movie: "titles where fType in ('movie') order by startYear",
         tvSeries: "titles where fType in ('tvSeries')",
         people: "people order by birthYear"
     };
@@ -90,7 +89,7 @@ function processGorP(val1,val2, res){
             const q = `select tconst from genres where genre= '${reqVal}'`
             const qry = {
             titles: `titles where fType in ('movie','tvSeries') and tconst in (${q}) order by startYear`,
-            movies: `titles where fType in ('movie') and tconst in (${q}) order by startYear`,
+            movie: `titles where fType in ('movie') and tconst in (${q}) order by startYear`,
             tvSeries: `titles where fType in ('tvSeries') and tconst in (${q}) order by startYear`}
 
             load(`/getAll/${qry[mValue]}`).then((res) => {
@@ -106,7 +105,29 @@ function processGorP(val1,val2, res){
             })
         })
     }
+}
 
+function processbyTitleORbyName (main,sec,sel){
+    document.querySelector('.qSelects').append(sel)
+    
+    sel.addEventListener('change',(e)=>{
+        const selVal = e.target.value;
+        
+        if(selVal != 'startingWith'){
+            const q = selVal == 'ascending' ? 'asc' : 'desc' 
+            
+            if(main != 'people'){
+                const qType = main=='titles' ? "('movie','tvSeries')" : `('${main}')`
+                const qry = `titles where fType in ${qType} order by title ${q} `
+                load(`/getAll/${qry}`).then((res) => {
+                    createTable(res)
+                })
+
+
+            }
+
+        }else{document.querySelector('.qSelects').append(createAlph(main))}
+    })
 }
 
 function removeSubSelects(amount) {
@@ -237,24 +258,27 @@ window.addEventListener('load', init)
 
 
 // create custom Alph button:
-function createAlph() {
+function createAlph(main) {
     const d = document.createElement('span')
     d.setAttribute('class', 'subSelection')
     d.innerHTML = `<p id="alph">A</p>
                     <span class="btnGroup">
                         <button>+</button>
                         <button>-</button>
-                    </span>`
+                    </span>
+                        <button id='queryGo'> Query! </button>
+                    `
 
-    logicAlph(d)
+    logicAlph(main,d)
     return d;
 }
 
 
 
-function logicAlph(d) {
+function logicAlph(main,d) {
     const alph = d.querySelector('#alph')
     const btn = d.querySelector('.btnGroup').children
+    const qBtn = d.querySelector('#queryGo')
 
     btn[0].addEventListener('click', () => {
         const chrCode = alph.innerText.charCodeAt(0);
@@ -269,6 +293,20 @@ function logicAlph(d) {
         if (chrCode > 65) {
             alph.innerText = String.fromCharCode(chrCode - 1);
         }
+    })
+
+    qBtn.addEventListener('click',()=>{
+        const val = d.querySelector('#alph')
+        const type = main!='people' ? 'titles': 'people';
+        
+        const nType = main != 'titles' ? `fType in ('${main}')` : `fType in ('movie','tvSeries') `
+        const sType = main!='people' ? `${nType} and title` : 'name' ;
+        
+        const qry = `${type} where ${sType} like '${val.innerText}%'`
+
+        load(`/getAll/${qry}`).then((res) => {
+            createTable(res)
+        })
     })
 
 }

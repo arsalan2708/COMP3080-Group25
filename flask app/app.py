@@ -77,7 +77,7 @@ def readInput(input):
 
 
 if __name__ == '__main__' :
-    app.run(debug=False,port=2780, host='0.0.0.0')
-    print("yaya running")
+    webbrowser.open('http://127.0.0.1:2708/')
+    app.run(debug=False,port=2708, host='0.0.0.0')
 
 print("\nprogram execution complete!")
