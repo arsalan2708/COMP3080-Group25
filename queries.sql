@@ -70,7 +70,35 @@ from episodes E full outer join titles T ON E.tconst = t.tconst
 where parent_tconst = 'tt0108778'
 order by season, epNo; 
 
+--provide list of all the actors for a movie 
+select name 
+from ((people P JOIN actors A ON P.nconst = A.nconst) join movies M ON M.tconst = A.tconst) 
+where A.tconst = 'tt1041829';
 
+--provides list of all the crew for a movie 
+select name 
+from ((people P JOIN crew A ON P.nconst = A.nconst) join movies M ON M.tconst = A.tconst) 
+where A.tconst = 'tt1041829';
+
+-- provide list of titles that a given actor has been in (movies and tvSeries) 
+select title
+from (((people P JOIN actors A ON P.nconst = A.nconst) 
+    join movies M ON M.tconst = A.tconst) 
+    join titles T on T.tconst = M.tconst) 
+where A.nconst = 'nm0000098'
+UNION
+select title 
+from (((people P JOIN actors A ON P.nconst = A.nconst) 
+    join tvSeries M ON M.tconst = A.tconst) 
+    join titles T on T.tconst = M.tconst)
+where A.nconst = 'nm0000098'; 
+
+--list of tvSeries an actor has been in 
+select title 
+from (((people P JOIN actors A ON P.nconst = A.nconst) 
+    join tvSeries M ON M.tconst = A.tconst) 
+    join titles T on T.tconst = M.tconst)
+where A.nconst = 'nm0000098'; 
 
 Select name
 from people P JOIN actors A ON P.nconst = A.nconst;  
