@@ -66,7 +66,6 @@ def test(varb):
     except:
         result =  ['No result found'] , 400
     
-    print(result)
     return result
 
 
@@ -78,7 +77,6 @@ def readInput(input):
 
 
 
-print(os.getcwd())
-app.run(debug=True,port=2780)
+app.run(debug=False,port=2780, host='0.0.0.0')
 
 print("\nprogram execution complete!")

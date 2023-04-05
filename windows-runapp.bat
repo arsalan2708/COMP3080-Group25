@@ -1,5 +1,4 @@
 cd "flask app"
 pip install -r requirements.txt
-py ./runApp.py
-python ./runApp.py
+flask run --host=0.0.0.0 --port=2708
 
