@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request
 import sqlite3
-import os
+import webbrowser
 
 
 
@@ -76,7 +76,8 @@ def readInput(input):
     return data
 
 
-if '__name__' == '__main__' :
+if __name__ == '__main__' :
     app.run(debug=False,port=2780, host='0.0.0.0')
+    print("yaya running")
 
 print("\nprogram execution complete!")
