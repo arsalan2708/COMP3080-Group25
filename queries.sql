@@ -26,21 +26,51 @@ from (((titles T JOIN movies S ON T.tconst = S.tconst) join ratings R ON R.tcons
 where genre = 'Comedy'
 order by rating desc limit 10; 
 
--- display all tvShows in order of highest to lowest rating  
-select title, ave()
-from ((titles T JOIN episodes E ON T.tconst = E.parent_tconst) join ratings R ON R.tconst=T.tconst) 
-order by title desc; 
+--display tv shows from highest to lowest rating 
+select titles.title, round(rating, 2)
+from(titles join  
+        (select E.parent_tconst, avg(rating) as rating
+        from episodes E join ratings R ON R.tconst=E.tconst 
+        group by E.parent_tconst
+        order by parent_tconst desc) ON parent_tconst = titles.tconst)
+order by rating desc; 
 
---display top 10 highest rated movie 
-select title, rating
-from ( (titles T JOIN movies S ON T.tconst = S.tconst) join ratings R ON R.tconst = T.tconst)
-order by rating desc LIMIT 10; 
+--display top 10 highest rated tvShows 
+select titles.title, round(rating, 2)
+from(titles join  
+        (select E.parent_tconst, avg(rating) as rating
+        from episodes E join ratings R ON R.tconst=E.tconst 
+        group by E.parent_tconst
+        order by parent_tconst desc) ON parent_tconst = titles.tconst)
+order by rating desc limit 10; 
+
+--display the average episode rating by parent_tconst
+select titles.title, round(rating, 2)
+from(titles join  
+        (select E.parent_tconst, avg(rating) as rating
+        from episodes E join ratings R ON R.tconst=E.tconst 
+        group by E.parent_tconst
+        order by parent_tconst desc) ON parent_tconst = titles.tconst)
+where parent_tconst = "tt0279600";
 
 --display top 10 tvShows by genre 
-select title, rating, genre
-from (((titles T JOIN movies S ON T.tconst = S.tconst) join ratings R ON R.tconst = T.tconst) join genres G on G.tconst=T.tconst)
+select titles.title, round(rating, 2)
+from((titles join  
+        (select E.parent_tconst, avg(rating) as rating
+        from episodes E join ratings R ON R.tconst=E.tconst 
+        group by E.parent_tconst
+        order by parent_tconst desc) ON parent_tconst = titles.tconst) 
+        JOIN genres G ON G.tconst = titles.tconst)
 where genre = 'Comedy'
 order by rating desc limit 10; 
+
+--list of all episodes for a given tconst
+select title, season, epNo as episodeNumber
+from episodes E full outer join titles T ON E.tconst = t.tconst
+where parent_tconst = 'tt0108778'
+order by season, epNo; 
+
+
 
 Select name
 from people P JOIN actors A ON P.nconst = A.nconst;  
@@ -57,7 +87,7 @@ from titles T JOIN movies S ON T.tconst = S.tconst
 where title != originaltitle
 order by title asc; 
 
---number of tit
+--number of titles that have a different title than their original title 
 select count(title)
 from titles T JOIN movies S ON T.tconst = S.tconst
 where title != originaltitle; 
