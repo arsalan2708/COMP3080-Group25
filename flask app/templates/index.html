@@ -13,11 +13,21 @@
         .btnGroup{
             display: flex;
             flex-flow: column;
+            max-width: 2rem;
+        }
+
+        .qSelects{
+            display: flex;
+            flex-flow: row;
+            max-width: 50vw;
+            flex-wrap: nowrap;
+            gap: 5px;
         }
 
         .btnGroup button{
             display: flex;
             height: .8rem;
+            max-width: 20px;
             padding: .2rem;
             font-size: x-small;
             align-items: center;
@@ -25,17 +35,20 @@
             font-weight: bold;
         }
 
-        div.subSelection{
-            display: flex;
-            margin:0 2px;
+        #spanContainer{
+            display:flex;
+            margin:0;
             padding: 0;
-            width : 6rem;
-            align-items: center;
+            max-width : 3rem;
             gap: 5px;
             max-height: 1rem;
+            align-items: center;
         }
 
+        #spanContainer button{margin: 0;}
+
         #alph{
+            height: 1rem;
             width:2rem;
             padding: .1rem.2rem;
             border: 1px solid black;
@@ -79,15 +92,16 @@
             color: white;
             cursor: pointer;
             }
-
+        
+        .showingResult{
+            display: inline;
+        }
         input[type=range]{
+            display: inline;
             min-width: 400px;
             max-width: 75%;
         }
 
-        .qSelects{
-            display: flex;
-        }
     </style>
 </head>
 

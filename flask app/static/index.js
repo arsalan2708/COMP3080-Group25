@@ -9,7 +9,7 @@ function init() {
         if (main.value != 'people') {
             const secondSel = createSelection(main.value, ['all', 'byTitle', 'yearReleased', 'genre'])
 
-            if (main.value == 'tvSeries') secondSel.innerHTML += '<option value="hasEnded">Completed</option> <option value="onGoing">on Going</option>'
+            if (main.value == 'tvSeries') secondSel.innerHTML += '<option value="completed">Completed</option> <option value="onGoing">on Going</option> <option value="rating">By Rating</option>'
             else if (main.value == 'movie') secondSel.innerHTML += '<option value="runTime">by Run-Time</option> <option value="rating">By Rating</option>'
 
             document.querySelector('.qSelects').append(secondSel)
@@ -44,7 +44,7 @@ function secondOnChange(second) {
     const main = document.querySelector('#main')
 
     second.addEventListener('change', () => {
-        removeSubSelects('last')
+        removeSubSelects('last',second)
         if (second.value == 'genre') {
             load('getAllGenre').then((r) => {
                 processGorP(main.value,second.value,r)
@@ -59,13 +59,17 @@ function secondOnChange(second) {
 
         } else if (second.value == 'all') {
             processAllRequest(main.value)
-        } else if (['yearReleased','birthYear'].includes(second.value)){
-           const sel = createSelection(second.value, ['yearEquals', 'yearBefore', 'yearAfter','yearBetween'])
-            
         } else if(['isAlive','hasPassedAway'].includes(second.value)){
             const wht = second.value=='isAlive' ? 'null' : 'not null'
             const q = `people where deathYear is ${wht} order by birthYear`
             load(`/getAll/${q}`).then((r)=>{createTable(r)})
+        } else if(['completed','onGoing'].includes(second.value)){
+            const wht = second.value=='onGoing' ? '=0' : '>0'
+            const q = `t.*, tv.endYear from titles t join tvSeries tv on tv.tconst=t.tconst where tv.endYear ${wht}  order by t.startYear`
+            load(`/get/${q}`).then((r)=>{createTable(r)})
+        } else if(['yearReleased','runTime','rating','birthYear'].includes(second.value)){
+            const sel = createSelection(second.value, ['equal', 'before', 'after','inBetween'])
+            document.querySelector('.qSelects').append(sel)
         }
 
     });
@@ -146,14 +150,16 @@ function processbyTitleORbyName (main,sec,sel){
     })
 }
 
-function removeSubSelects(amount) {
+function removeSubSelects(amount,curr=null) {
     const child = document.querySelectorAll('.subSelection')
     if (child != null && amount == 'all') {
         for (c of child) {
             c.parentNode.removeChild(c)
         }
-    } else if (child.length > 1 && amount == 'last') {
-        child[child.length - 1].parentNode.removeChild(child[child.length - 1])
+    } else if (amount == 'last' && curr!=null) {
+        for(let i=child.length-1; i>=0 && child[i]!=curr ; i-- ){
+            child[i].parentNode.removeChild(child[i])
+        }
     }
 }
 
@@ -174,7 +180,6 @@ function createTable(info) {
         currDiv.append(document.createTextNode(info[0]+'!'))
     }
     else{
-    console.log(info)
     const table = document.createElement('table')
     table.setAttribute('class', 'qTable')
 
@@ -183,7 +188,6 @@ function createTable(info) {
 
     const header = info.shift()
     header.unshift('#')
-    console.log(info)
     indexList = [...Array(header.length).keys()]
     indexList.splice(1,1)
     var row = document.createElement('tr')
@@ -201,7 +205,7 @@ function createTable(info) {
     slider.setAttribute('id', 'slider')
     let min = Math.min(5, info.length)
     let max = info.length
-    let currValue = Math.min(35,Math.floor((max + min) / 3))
+    let currValue = Math.min(10,Math.floor((max + min) / 2))
     slider.max = max;
     slider.min = min;
     slider.value = currValue
@@ -281,6 +285,7 @@ window.addEventListener('load', init)
 function createAlph(main) {
     const d = document.createElement('div')
     d.setAttribute('class', 'subSelection')
+    d.setAttribute('id', 'spanContainer')
     d.innerHTML = `<p id="alph">A</p>
                     <span class="btnGroup">
                         <button>+</button>
