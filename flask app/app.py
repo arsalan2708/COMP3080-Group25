@@ -95,7 +95,7 @@ def getTypeBetween(req,byVal,value1,value2):
 @app.route('/actorsFor/<typ>/<tconst>', methods=['POST'])
 def getactorsFor(typ,tconst):
     typFix = typ if typ!='movie' else 'movies'
-    q = f''' select P.nconst, P.name
+    q = f''' select P.nconst, P.name as cast
             from ((people P JOIN actors A ON P.nconst = A.nconst) join {typFix} M ON M.tconst = A.tconst) 
             where A.tconst = '{tconst}'; '''
 
@@ -104,8 +104,8 @@ def getactorsFor(typ,tconst):
 @app.route('/crewFor/<typ>/<tconst>', methods=['POST'])
 def getcrewFor(typ,tconst):
     typFix = typ if typ!='movie' else 'movies'
-    q = f''' select P.nconst, P.name
-            from ((people P JOIN actors A ON P.nconst = A.nconst) join {typFix} M ON M.tconst = A.tconst) 
+    q = f''' select P.nconst, P.name as crew
+            from ((people P JOIN crew A ON P.nconst = A.nconst) join {typFix} M ON M.tconst = A.tconst) 
             where A.tconst = '{tconst}' '''
 
     return outQuery(q);
@@ -117,6 +117,21 @@ def getEpList(tconst):
             from episodes E full outer join titles T ON E.tconst = t.tconst
             where parent_tconst = '{tconst}'
             order by season, epNo; '''
+    print(q)
+    return outQuery(q);
+
+
+@app.route('/knownFor/<nconst>', methods=['POST'])
+def getKnownFor(nconst):
+    q = f'''select T.tconst as tconst, title, T.startYear as releasedYear
+            from people P JOIN crew A ON P.nconst = A.nconst
+    join titles T on T.tconst = A.tconst
+    where A.nconst = '{nconst}'
+    UNION
+    select T.tconst, title , T.startYear 
+    from people P JOIN actors A ON P.nconst = A.nconst
+    join titles T on T.tconst = A.tconst
+    where A.nconst = '{nconst}' '''
     print(q)
     return outQuery(q);
 
@@ -140,6 +155,25 @@ select E.parent_tconst as tconst, round(avg(rating),2) as rating
     cursor.close()
     conn.close()
     return result
+
+
+@app.route('/workedWith/<nconst>', methods=["POST"])
+def workedWith(nconst):
+    q= f''' with alljobs as (select tconst, nconst from actors
+UNION
+select tconst, nconst from crew)
+
+select distinct name
+from alljobs join people Z on alljobs.nconst = Z.nconst
+where Z.nconst != '{nconst}' and alljobs.tconst IN (
+    select A.tconst
+    from (((people P JOIN alljobs A ON P.nconst = A.nconst) 
+    join tvSeries M ON M.tconst = A.tconst) 
+    join titles T on T.tconst = M.tconst)
+    where A.nconst = '{nconst}' )
+order by name asc; '''
+
+    return outQuery(q)
     
 
    

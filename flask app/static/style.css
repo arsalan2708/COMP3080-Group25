@@ -86,6 +86,10 @@ body{font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida
     cursor: pointer;
     }
 
+.qTable{
+    margin-bottom: 50px;
+}
+
 .showingResult{
     display: inline;
 }
@@ -104,21 +108,15 @@ input[type=range]{
 }
 
 
-
 #knownWorks , #workedWith{
     padding: .2rem 1rem;
-    background-color: rgb(75, 75, 75);
+    background-color: rgb(10, 129, 197);
     color: rgb(233, 227, 227);
     width: fit-content;
     border-radius: 4px 4px 0 0;
-    cursor: pointer;
-    transition: background-color .5s ease, color 1s linear;
+    margin-bottom: 1px;
 }
 
-#knownWorks:hover , #workedWith:hover{
-    background-color: rgb(194, 105, 105);
-    color: rgb(255, 255, 255);
-}
 
 .PersonInfo h2:first-of-type, .PersonInfo p:first-of-type{
     display: inline;
@@ -127,6 +125,7 @@ input[type=range]{
 #imdbLink{
     padding: .2rem 1rem;
     background-color: rgb(39, 39, 39);
+    font-size: small;
     color: rgb(233, 233, 233);
     width: fit-content;
     border-radius: 5px;

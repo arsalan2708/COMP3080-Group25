@@ -378,18 +378,22 @@ function putLifeIn(row, data, prevCont) {
         emptyMainBody();
         removeSubSelects('all')
         document.querySelector('#main').value = 'null';
-
         const content = document.querySelector('.content')
-        const backButton = document.createElement('button')
-        backButton.innerText = 'Go Back'
-        backButton.addEventListener('click', () => { content.replaceWith(prevCont) })
-        content.append(backButton)
+        
+        // const backButton = document.createElement('button')
+        // backButton.setAttribute('class','backBtn')
+        // backButton.innerText = 'Go Back'
+        // backButton.addEventListener('click', () => { content.replaceWith(prevCont) })
+        // content.append(backButton)
 
 
         if (data[1].includes('nm')) {
             alert(`clicked: (${data[1]}) -> ${data[2]} ${data[4]}`)
-        } else
-            alert(`clicked: (${data[1]}) -> ${data[3]}`)
+            content.append(createPersonTab(data[1],data[2], data[3], data[4]))
+        } else{
+            alert(`clicked: (${data}`)
+            content.append(createMediaTab(data[1],data[2], data[3], data[5]))
+        }
     })
 
 }
@@ -398,21 +402,87 @@ function putLifeIn(row, data, prevCont) {
 
 
 
-function createPersonTab(info) {
+function createPersonTab(nconst,name,birthYear,deathYear) {
 
     const cont = document.createElement('div')
+    const d = deathYear=='null' ? 'Present' : deathYear
     cont.setAttribute('class', 'PersonInfo')
-    cont.innerHTML = `<span>    <h2>Name</h2> <p> <span>1992</span> - <span>Present</span>  </p>
-    <a href= https://www.imdb.com/name/nm305333 > <p id="imdbLink"> IMDb Link </p> </a> </span>
+    cont.innerHTML = `<span>    <h2>${name}</h2> <p> <span>${birthYear}</span> - <span>${d}</span>  </p>
+    <a href= https://www.imdb.com/name/${nconst} > <p id="imdbLink"> IMDb</p> </a> </span>
 
-    <div class="known4"> <h4 id="knownWorks">Known Works of Name</h4> </div>
-    <div class="peopleWorked"> <h4 id="workedWith"> Name worked with </h4> </div>`
+    <div class="known4"> <h4 id="knownWorks">Known Works of ${name}</h4> </div>
+    <div class="peopleWorked"> <h4 id="workedWith"> ${name} worked with </h4> </div>`
 
-    document.body.append(cont);
+    const known4 = cont.querySelector('.known4')
+    load(`knownFor/${nconst}`).then((r)=>{known4.append(createSmallTable(r)) })
+    const pplWorkedWith = cont.querySelector('.peopleWorked')
+
+    load(`workedWith/${nconst}`).then((r)=>{pplWorkedWith.append(createSmallTable(r))})
+
+    return cont
 }
 
 
-function createSmallTable(){
+function createMediaTab(tconst,fType,title,releasedYear){
+    const cont = document.createElement('div')
+    cont.setAttribute('class', 'title')
+    cont.innerHTML = `<span>    <h2>${title}</h2> <p> <span>${releasedYear}</span>  </p>
+    <a href= https://www.imdb.com/title/${tconst} > <p id="imdbLink"> IMDb</p> </a> </span>
+
+    <div class="known4"> <h4 id="knownWorks">Crew and Cast</h4> </div>
+    ${fType=='tvSeries' ? '<div class="peopleWorked"> <h4 id="workedWith"> List of Episodes </h4> </div>' :''}`
+
+    const known4 = cont.querySelector('.known4')
+    load(`actorsFor/${fType}/${tconst}`).then((r)=>{known4.append(createSmallTable(r)) })
+    load(`crewFor/${fType}/${tconst}`).then((r)=>{known4.append(createSmallTable(r)) })
+    
+    if(fType=='tvSeries'){
+
+        const pplWorkedWith = cont.querySelector('.peopleWorked')
+        load(`listEp/${tconst}`).then((r)=>{pplWorkedWith.append(createSmallTable(r)) })
+
+    }
+
+    return cont;
+}
+
+
+function createSmallTable(info){
+    console.log(info)
+    if (info == 'No result found') {
+        return document.createTextNode(info[0] + '!')
+    }
+    else {
+        const table = document.createElement('table')
+        table.setAttribute('class', 'qTable')
+
+        const tableHead = document.createElement('thead')
+        const tableBody = document.createElement('tbody')
+
+        const header = info.shift()
+        header.unshift('#')
+        indexList = [...Array(header.length).keys()]
+        indexList.splice(1, 1)
+        var row = document.createElement('tr')
+        for (val of indexList) row.innerHTML += `<th>${header[val]}</th>`
+        tableHead.append(row)
+
+        let count = 0;
+        info.forEach(element => {
+            element.unshift(count + 1)
+            count += 1
+        });
+
+        for (r of info) {
+            row = document.createElement('tr')
+            for (c of indexList) row.innerHTML += `<td>${r[c]}</td>`
+            tableBody.append(row)
+        }
+
+
+        table.append(tableHead, tableBody)
+        return table
+    }
 
 }
 
@@ -484,8 +554,9 @@ function logicAlph(main, d) {
 
         const nType = main != 'titles' ? `fType in ('${main}')` : `fType in ('movie','tvSeries') `
         const sType = main != 'people' ? `${nType} and title` : 'name';
+        const orderBy = main == 'people' ? 'name': 'title'
 
-        const qry = `${type} where ${sType} like '${val.innerText}%'`
+        const qry = `${type} where ${sType} like '${val.innerText}%' order by ${orderBy}`
 
         load(`/getAll/${qry}`).then((res) => {
             createTable(res)
