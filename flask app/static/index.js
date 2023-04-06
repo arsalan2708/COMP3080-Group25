@@ -68,8 +68,11 @@ function secondOnChange(second) {
             const q = `t.*, tv.endYear from titles t join tvSeries tv on tv.tconst=t.tconst where tv.endYear ${wht}  order by t.startYear`
             load(`/get/${q}`).then((r)=>{createTable(r)})
         } else if(['yearReleased','runTime','rating','birthYear'].includes(second.value)){
-            const sel = createSelection(second.value, ['equal', 'before', 'after','inBetween'])
+            const sel = createSelection(second.value, ['before', 'after','inBetween'])
+            if(['titles','movie','people'].includes(main.value))
+                sel.innerHTML+= `<option value="equal">equal</option>`
             document.querySelector('.qSelects').append(sel)
+            numMatchInp(main.value,second.value,sel)
         }
 
     });
@@ -87,7 +90,7 @@ function processAllRequest(mValue) {
                 from episodes E join ratings R ON R.tconst=E.tconst 
                 group by E.parent_tconst
                 order by parent_tconst desc) ON parent_tconst = titles.tconst)`,
-        people: "/getAll/people order by birthYear"
+        people: "/getAll/people order by birthYear asc"
     };
 
     load(`${qry[mValue]}`).then((res) => {
@@ -265,14 +268,68 @@ function putLifeIn(row,data){
 }
 
 
+function numMatchInp(main,second,sel){
+    sel.addEventListener('change',()=>{
+        removeSubSelects('last',sel)
+        const m = main;
+        const s = second;
+
+        if(sel.value!='inBetween'){
+            if(main=='people'){
+                const min = sel.value=='before'  ? 1921 : 1920 
+                const max = sel.value == 'after' ? 2013 : 2014
+                const cont = createSimpleNum(min,max,2)
+                sel.parentNode.append(cont);
+                const btn = cont.querySelector('#goQuery')
+                btn.addEventListener('click',(e)=>{
+                    const type = sel.value=='equal' ? '=' : sel.value=='before' ? '<' : '>'
+                    const value = e.target.parentNode.querySelector('input').value
+
+                    load(`getAll/people where birthYear ${type} ${value} order by birthYear asc `).then((r)=>{
+                        createTable(r);
+                    })
+
+                })
+
+            }
+        }else{
+            if(main=='people'){
+                const cont = createinBetweenQuery(1920,2015,2)
+                sel.parentNode.append(cont);
+                const btn = cont.querySelector('#goQuery')
+                btn.addEventListener('click',(e)=>{
+                    const vv = e.target.parentNode.querySelectorAll('input');
+                    const val1 = vv[0].value;
+                    const val2 = vv[1].value;
+
+                    load(`getAll/people where birthYear>=${val1} and birthYear<=${val2} order by birthYear asc `).then((r)=>{
+                        createTable(r);
+                    })
+
+                })
+
+            }
+        }
+
+    })
+}
 
 
 
 
 
-
-
-
+function removeSubSelects(amount,curr=null) {
+    const child = document.querySelectorAll('.subSelection')
+    if (child != null && amount == 'all') {
+        for (c of child) {
+            c.parentNode.removeChild(c)
+        }
+    } else if (amount == 'last' && curr!=null) {
+        for(let i=child.length-1; i>=0 && child[i]!=curr ; i-- ){
+            child[i].parentNode.removeChild(child[i])
+        }
+    }
+}
 
 
 
@@ -334,6 +391,64 @@ function logicAlph(main,d) {
         })
     })
 
+}
+
+
+function createSimpleNum(min,max,step){
+    const d = document.createElement('div')
+    d.setAttribute('class','subSelection')
+
+    const b = document.createElement('button')
+    b.innerText = 'Query!'
+    b.setAttribute('id','goQuery')
+
+    const inp = document.createElement('input')
+    inp.setAttribute('type','number')
+    inp.min = min;
+    inp.max = max;
+    inp.step = step;
+    inp.value  = Math.floor((max+min)/2);
+    
+    
+    inp.addEventListener('keydown',(e)=>{e.preventDefault();})
+    d.append(inp,b)
+    
+    return d;
+}
+
+function createinBetweenQuery(min,max,step){
+    const d = document.createElement('div')
+    d.setAttribute('class','subSelection')
+
+    const b = document.createElement('button')
+    b.innerText = 'Query!'
+    b.setAttribute('id','goQuery')
+
+    const inp = document.createElement('input')
+    inp.setAttribute('type','number')
+    inp.min = min;
+    inp.max = Math.floor(max*.99);
+    inp.step = step;
+    inp.placeholder = 'from';
+
+    const inp2 = document.createElement('input')
+    inp2.setAttribute('type','number')
+    inp2.min = Math.floor(max*.991);
+    inp2.max = max;
+    inp2.step = step;
+    inp2.placeholder = 'till';
+    
+    
+    inp.addEventListener('change',()=>{
+        const inp1Val = parseInt(inp.value)
+        inp2.min = (inp1Val+step)> inp2.max ? inp2.max-1 : (inp1Val+step)
+        inp2.value = (inp1Val+step)> inp2.max ? inp2.max-1 : (inp1Val+step)
+    })
+    inp.addEventListener('keydown',(e)=>{e.preventDefault();})
+    inp2.addEventListener('keydown',(e)=>{e.preventDefault();})
+    d.append(inp,inp2,b)
+    
+    return d;
 }
 
 
