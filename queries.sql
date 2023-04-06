@@ -100,20 +100,58 @@ from (((people P JOIN actors A ON P.nconst = A.nconst)
     join titles T on T.tconst = M.tconst)
 where A.nconst = 'nm0000098'; 
 
-Select name
-from people P JOIN actors A ON P.nconst = A.nconst;  
+--List all the actors that have worked with a given actor in another movie 
+select distinct name
+from actors Q join people Z on Q.nconst = Z.nconst
+where Z.nconst != 'nm0000098' and Q.tconst IN (
+    select A.tconst
+    from (((people P JOIN actors A ON P.nconst = A.nconst) 
+    join movies M ON M.tconst = A.tconst) 
+    join titles T on T.tconst = M.tconst)
+    where A.nconst = 'nm0000098')
+order by name asc; 
 
-Select name
-from people P JOIN crew A ON P.nconst = A.nconst; 
+--Select all the other actors that have worked with a given actor in another TV Show
+select distinct name
+from actors Q join people Z on Q.nconst = Z.nconst
+where Z.nconst != 'nm0000098' and Q.tconst IN (
+    select A.tconst
+    from (((people P JOIN actors A ON P.nconst = A.nconst) 
+    join tvSeries M ON M.tconst = A.tconst) 
+    join titles T on T.tconst = M.tconst)
+    where A.nconst = 'nm0000098')
+order by name asc; 
 
-select title
-from titles T JOIN tvSeries S ON T.tconst = S.tconst;
+--Select all the other actors that have worked with a given actor in any other production
+select distinct name
+from actors Q join people Z on Q.nconst = Z.nconst
+where Z.nconst != 'nm0000098' and Q.tconst IN (
+    select A.tconst
+    from (((people P JOIN actors A ON P.nconst = A.nconst) 
+    join tvSeries M ON M.tconst = A.tconst) 
+    join titles T on T.tconst = M.tconst)
+    where A.nconst = 'nm0000098')
+UNION
+select distinct name
+from actors Q join people Z on Q.nconst = Z.nconst
+where Z.nconst != 'nm0000098' and Q.tconst IN (
+    select A.tconst
+    from (((people P JOIN actors A ON P.nconst = A.nconst) 
+    join movies M ON M.tconst = A.tconst) 
+    join titles T on T.tconst = M.tconst)
+    where A.nconst = 'nm0000098')
+order by name asc; 
 
-
-select title, originaltitle
-from titles T JOIN movies S ON T.tconst = S.tconst
-where title != originaltitle
-order by title asc; 
+--Crew members that have worked with a given actor 
+select distinct name
+from crew Q join people Z on Q.nconst = Z.nconst
+where Z.nconst != 'nm0000098' and Q.tconst IN (
+    select A.tconst
+    from (((people P JOIN actors A ON P.nconst = A.nconst) 
+    join tvSeries M ON M.tconst = A.tconst) 
+    join titles T on T.tconst = M.tconst)
+    where A.nconst = 'nm0000098')
+order by name asc; 
 
 --number of titles that have a different title than their original title 
 select count(title)
