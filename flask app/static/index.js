@@ -31,7 +31,7 @@ function createSelection(id, selectVal) {
     sel.setAttribute('id', id)
     sel.setAttribute('class', 'subSelection')
 
-    sel.innerHTML = '<option value="" selected disabled hidden>---Select By---</option>'
+    sel.innerHTML = '<option value="null" selected disabled hidden>---Select By---</option>'
     for (opt of selectVal) {
         sel.innerHTML += `<option value='${opt}'> ${opt} </option>`
     }
@@ -223,7 +223,7 @@ function createTable(info) {
         for (r of info) {
             row = document.createElement('tr')
             for (c of indexList) row.innerHTML += `<td>${r[c]}</td>`
-            putLifeIn(row, r)
+            putLifeIn(r,currDiv)
             tableBody.append(row)
             count++;
             if (count > slider.value) break;
@@ -239,7 +239,7 @@ function createTable(info) {
             for (r of info) {
                 row = document.createElement('tr')
                 for (c of len) row.innerHTML += `<td>${r[c]}</td>`
-                putLifeIn(row, r)
+                putLifeIn(r,currDiv)
                 newtBody.append(row)
                 count++;
                 if (count > slider.value) break;
@@ -253,21 +253,6 @@ function createTable(info) {
         currDiv.append(numShowing, slider, table)
     }
 }
-
-
-
-function putLifeIn(row, data) {
-
-    row.addEventListener('click', () => {
-        const d = data;
-        if (d[1].includes('nm')) {
-            alert(`clicked: (${d[1]}) -> ${d[2]}`)
-        } else
-            alert(`clicked: (${d[1]}) -> ${d[3]}`)
-    })
-
-}
-
 
 function numMatchInp(main, second, sel) {
     sel.addEventListener('change', () => {
@@ -304,10 +289,9 @@ function numMatchInp(main, second, sel) {
                         const type = sel.value == 'equal' ? '=' : sel.value == 'before' ? '<' : '>'
                         const value = e.target.parentNode.querySelector('input').value
 
-                        const qry = main == 'titles' ? `/getAll/titles where fType in ('movie','tvSeries') and 
-                        startYear ${type} ${value} order by startYear` : `getType/${main}/${'startYear'}/${type}/${value}`
+                        const qry = `getType/${main}/${'startYear'}/${type}/${value}`
 
-                        load(`${qry}`).then((r) => { createTable(r); })
+                        load(qry).then((r) => { createTable(r); })
 
                     });
                 } else if (second == 'rating') {
@@ -388,6 +372,27 @@ function numMatchInp(main, second, sel) {
     })
 }
 
+
+function putLifeIn(data, prevCont) {    
+    row.addEventListener('click', () => {
+        emptyMainBody();
+        removeSubSelects('all')
+        document.querySelector('#main').value = 'null';
+        
+        const content = document.querySelector('.content')
+        const backButton = document.createElement('button')
+        backButton.innerText = 'Go Back'
+        backButton.addEventListener('click',()=>{content.replaceWith(prevCont)})
+        content.append(backButton)
+        
+        
+        if (data[1].includes('nm')) {
+            alert(`clicked: (${data[1]}) -> ${data[2]}`)
+        } else
+            alert(`clicked: (${data[1]}) -> ${data[3]}`)
+    })
+
+}
 
 
 

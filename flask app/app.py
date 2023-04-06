@@ -110,7 +110,9 @@ def getRating(req,byVal,typ,value):
                                 group by E.parent_tconst
                                 order by parent_tconst desc) ON parent_tconst = titles.tconst) where {byVal} {typ} {value} order by {byVal}  '''
 
-    q = q1 if req=='movie' else q2
+    q3 = f'''select * from titles where fType in ('movie','tvSeries') and {byVal} {typ} {value } order by {byVal} '''
+
+    q = q3 if req=='titles' else (q1 if req=='movie' else q2) 
 
     try:
         result = list()
