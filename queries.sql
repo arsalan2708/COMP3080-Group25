@@ -1,3 +1,17 @@
+--all people that have worked with people 
+with alljobs as (select tconst, nconst from actors
+UNION
+select tconst, nconst from crew)
+select distinct name
+from alljobs join people Z on alljobs.nconst = Z.nconst
+where Z.nconst != 'nm0000098' and alljobs.tconst IN (
+    select A.tconst
+    from (((people P JOIN alljobs A ON P.nconst = A.nconst) 
+    join tvSeries M ON M.tconst = A.tconst) 
+    join titles T on T.tconst = M.tconst)
+    where A.nconst = 'nm0000098')
+order by name asc; 
+
 Select * from actors;
 select * from crew; 
 select * from episodes; 
