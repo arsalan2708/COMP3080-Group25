@@ -223,7 +223,7 @@ function createTable(info) {
         for (r of info) {
             row = document.createElement('tr')
             for (c of indexList) row.innerHTML += `<td>${r[c]}</td>`
-            putLifeIn(r,currDiv)
+            putLifeIn(row, r, currDiv)
             tableBody.append(row)
             count++;
             if (count > slider.value) break;
@@ -239,7 +239,7 @@ function createTable(info) {
             for (r of info) {
                 row = document.createElement('tr')
                 for (c of len) row.innerHTML += `<td>${r[c]}</td>`
-                putLifeIn(r,currDiv)
+                putLifeIn(row, r, currDiv)
                 newtBody.append(row)
                 count++;
                 if (count > slider.value) break;
@@ -358,7 +358,7 @@ function numMatchInp(main, second, sel) {
                     const vv = e.target.parentNode.querySelectorAll('input');
                     const val1 = vv[0].value;
                     const val2 = vv[1].value;
-                    const byVal = second=='yearReleased' ? 'startYear' : second=='runTime' ? second : second=='rating' && main=='movie' ? 'r.rating' :  'round(rating,2)'
+                    const byVal = second == 'yearReleased' ? 'startYear' : second == 'runTime' ? second : second == 'rating' && main == 'movie' ? 'r.rating' : 'round(rating,2)'
 
                     const qry = `getTypeBetween/${main}/${byVal}/${val1}/${val2}`
                     load(qry).then((r) => {
@@ -373,24 +373,46 @@ function numMatchInp(main, second, sel) {
 }
 
 
-function putLifeIn(data, prevCont) {    
+function putLifeIn(row, data, prevCont) {
     row.addEventListener('click', () => {
         emptyMainBody();
         removeSubSelects('all')
         document.querySelector('#main').value = 'null';
-        
+
         const content = document.querySelector('.content')
         const backButton = document.createElement('button')
         backButton.innerText = 'Go Back'
-        backButton.addEventListener('click',()=>{content.replaceWith(prevCont)})
+        backButton.addEventListener('click', () => { content.replaceWith(prevCont) })
         content.append(backButton)
-        
-        
+
+
         if (data[1].includes('nm')) {
-            alert(`clicked: (${data[1]}) -> ${data[2]}`)
+            alert(`clicked: (${data[1]}) -> ${data[2]} ${data[4]}`)
         } else
             alert(`clicked: (${data[1]}) -> ${data[3]}`)
     })
+
+}
+
+
+
+
+
+function createPersonTab(info) {
+
+    const cont = document.createElement('div')
+    cont.setAttribute('class', 'PersonInfo')
+    cont.innerHTML = `<span>    <h2>Name</h2> <p> <span>1992</span> - <span>Present</span>  </p>
+    <a href= https://www.imdb.com/name/nm305333 > <p id="imdbLink"> IMDb Link </p> </a> </span>
+
+    <div class="known4"> <h4 id="knownWorks">Known Works of Name</h4> </div>
+    <div class="peopleWorked"> <h4 id="workedWith"> Name worked with </h4> </div>`
+
+    document.body.append(cont);
+}
+
+
+function createSmallTable(){
 
 }
 

@@ -46,60 +46,16 @@ def getProfessions():
 
 @app.route('/getAll/<varb>', methods=['POST'])
 def test(varb):
-    conn = sqlite3.connect(dbPath,uri=True)
-    cursor = conn.cursor()
-
-    try:
-        result = list()
-        res = cursor.execute(f" select * from {varb}")
-        names = [description[0] for description in cursor.description]
-
-        first = res.fetchone();
-        if first is not None:
-            result.append(names)
-            result.append(first)
-            for r in res.fetchall():
-                result.append(r)
-        else:
-            result =  ['No result found']
-
-    except:
-        result =  ['No result found'] , 400
-    
-    return result
+    q = f" select * from {varb}"
+    return outQuery(q)
 
 @app.route('/get/<varb>', methods=['POST'])
 def get(varb):
-    conn = sqlite3.connect(dbPath,uri=True)
-    cursor = conn.cursor()
-
-    try:
-        result = list()
-        res = cursor.execute(f" select {varb}")
-        names = [description[0] for description in cursor.description]
-
-        first = res.fetchone();
-        if first is not None:
-            result.append(names)
-            result.append(first)
-            for r in res.fetchall():
-                result.append(r)
-        else:
-            result =  ['No result found']
-
-    except:
-        result =  ['No result found'] , 404
-    
-    cursor.close()
-    conn.close()
-    return result
+    q = f" select {varb}"
+    return outQuery(q)
 
 @app.route('/getType/<req>/<byVal>/<typ>/<value>', methods=['POST'])
 def getRating(req,byVal,typ,value):
-    conn = sqlite3.connect(dbPath,uri=True)
-    cursor = conn.cursor()
-
-    print(byVal)
     q1 = f'''select t.* , m.runTime, r.rating from titles t 
         join movies m on t.tconst = m.tconst  join ratings r on t.tconst = r.tconst where {byVal} {typ} {value} order by {byVal}'''
 
@@ -113,34 +69,12 @@ def getRating(req,byVal,typ,value):
     q3 = f'''select * from titles where fType in ('movie','tvSeries') and {byVal} {typ} {value } order by {byVal} '''
 
     q = q3 if req=='titles' else (q1 if req=='movie' else q2) 
-
-    try:
-        result = list()
-        res = cursor.execute(q)
-        names = [description[0] for description in cursor.description]
-
-        first = res.fetchone();
-        if first is not None:
-            result.append(names)
-            result.append(first)
-            for r in res.fetchall():
-                result.append(r)
-        else:
-            result =  ['No result found']
-
-    except:
-        result =  ['No result found'] , 400
     
-    cursor.close()
-    conn.close()
-    return result
+    return outQuery(q)
 
 
 @app.route('/getTypeBetween/<req>/<byVal>/<value1>/<value2>', methods=['POST'])
 def getTypeBetween(req,byVal,value1,value2):
-    conn = sqlite3.connect(dbPath,uri=True)
-    cursor = conn.cursor()
-
     q1 = f'''select t.* , m.runTime, r.rating from titles t 
         join movies m on t.tconst = m.tconst  join ratings r on t.tconst = r.tconst where {byVal}>={value1} and {byVal}<={value2} order by {byVal}'''
 
@@ -155,6 +89,67 @@ def getTypeBetween(req,byVal,value1,value2):
 
     q = q3 if req=='titles' else (q1 if req=='movie' else q2) 
 
+    return outQuery(q)
+
+
+@app.route('/actorsFor/<typ>/<tconst>', methods=['POST'])
+def getactorsFor(typ,tconst):
+    typFix = typ if typ!='movie' else 'movies'
+    q = f''' select P.nconst, P.name
+            from ((people P JOIN actors A ON P.nconst = A.nconst) join {typFix} M ON M.tconst = A.tconst) 
+            where A.tconst = '{tconst}'; '''
+
+    return outQuery(q);
+
+@app.route('/crewFor/<typ>/<tconst>', methods=['POST'])
+def getcrewFor(typ,tconst):
+    typFix = typ if typ!='movie' else 'movies'
+    q = f''' select P.nconst, P.name
+            from ((people P JOIN actors A ON P.nconst = A.nconst) join {typFix} M ON M.tconst = A.tconst) 
+            where A.tconst = '{tconst}' '''
+
+    return outQuery(q);
+
+
+@app.route('/listEp/<tconst>', methods=['POST'])
+def getEpList(tconst):
+    q = f''' select E.tconst, title, season, epNo as episodeNumber, runTime
+            from episodes E full outer join titles T ON E.tconst = t.tconst
+            where parent_tconst = '{tconst}'
+            order by season, epNo; '''
+    print(q)
+    return outQuery(q);
+
+
+@app.route('/calcTvRating/<tconst>', methods=['POST'])
+def getCalcRating(tconst):
+    q= f'''select rating from(
+select E.parent_tconst as tconst, round(avg(rating),2) as rating 
+        from episodes E 
+        join ratings R ON R.tconst=E.tconst 
+        group by E.parent_tconst
+        order by parent_tconst desc ) where tconst = '{tconst}' '''
+    
+    conn = sqlite3.connect(dbPath,uri=True)
+    cursor = conn.cursor()
+    res= cursor.execute(q)
+    result = list()
+    for r in res.fetchall():
+        result.append(r[0])
+
+    cursor.close()
+    conn.close()
+    return result
+    
+
+   
+
+
+def outQuery(q):
+    conn = sqlite3.connect(dbPath,uri=True)
+    cursor = conn.cursor()
+    result =  ['No result found']
+
     try:
         result = list()
         res = cursor.execute(q)
@@ -174,16 +169,8 @@ def getTypeBetween(req,byVal,value1,value2):
     
     cursor.close()
     conn.close()
+
     return result
-
-
-
-
-def readInput(input):
-    data = input.split('+')
-    for i in range(len(data)):
-        data[i] = tuple(data[i].split('='))
-    return data
 
 
 if __name__ == '__main__' :
