@@ -304,55 +304,88 @@ function numMatchInp(main, second, sel) {
                         const type = sel.value == 'equal' ? '=' : sel.value == 'before' ? '<' : '>'
                         const value = e.target.parentNode.querySelector('input').value
 
-                        const qry = main =='titles' ? `/getAll/titles where fType in ('movie','tvSeries') and 
+                        const qry = main == 'titles' ? `/getAll/titles where fType in ('movie','tvSeries') and 
                         startYear ${type} ${value} order by startYear` : `getType/${main}/${'startYear'}/${type}/${value}`
- 
+
                         load(`${qry}`).then((r) => { createTable(r); })
 
                     });
-                } else if (second== 'rating'){
-                        const min = sel.value =='before' ? 3 : 1;
-                        const max = sel.value == 'after' ? 8 : 10;
-                        const cont = createSimpleNum(min, max, .2)
-                        sel.parentNode.append(cont);
+                } else if (second == 'rating') {
+                    const min = sel.value == 'before' ? 3 : 1;
+                    const max = sel.value == 'after' ? 8 : 10;
+                    const cont = createSimpleNum(min, max, .2)
+                    sel.parentNode.append(cont);
 
-                        const btn = cont.querySelector('#goQuery');
-                        btn.addEventListener('click', (e) => {
+                    const btn = cont.querySelector('#goQuery');
+                    btn.addEventListener('click', (e) => {
                         const type = sel.value == 'equal' ? '=' : sel.value == 'before' ? '<' : '>'
                         const value = e.target.parentNode.querySelector('input').value
-                        const byVal = main=='movie' ? 'r.rating' : 'round(rating,2)'
+                        const byVal = main == 'movie' ? 'r.rating' : 'round(rating,2)'
                         console.log(byVal)
 
                         const qry = `getType/${main}/${byVal}/${type}/${value}`
- 
+
                         load(`${qry}`).then((r) => { createTable(r); })
 
                     });
 
-                    }
-            }
-                
-        }else {
-                if (main == 'people') {
-                    const cont = createinBetweenQuery(1920, 2015, 2)
+                } else if (second == 'runTime') {
+                    const min = sel.value == 'before' ? 68 : 65;
+                    const max = sel.value == 'after' ? 250 : 300;
+                    const cont = createSimpleNum(min, max, 5)
                     sel.parentNode.append(cont);
-                    const btn = cont.querySelector('#goQuery')
+
+                    const btn = cont.querySelector('#goQuery');
                     btn.addEventListener('click', (e) => {
-                        const vv = e.target.parentNode.querySelectorAll('input');
-                        const val1 = vv[0].value;
-                        const val2 = vv[1].value;
+                        const type = sel.value == 'equal' ? '=' : sel.value == 'before' ? '<' : '>'
+                        const value = e.target.parentNode.querySelector('input').value
+                        const qry = `getType/movie/runTime/${type}/${value}`
 
-                        load(`getAll/people where birthYear>=${val1} and birthYear<=${val2} order by birthYear asc `).then((r) => {
-                            createTable(r);
-                        })
-
-                    })
-                } else {
-
+                        load(`${qry}`).then((r) => { createTable(r); })
+                    });
 
                 }
             }
-        })
+
+        } else {
+            if (main == 'people') {
+                const cont = createinBetweenQuery(1920, 2015, 2)
+                sel.parentNode.append(cont);
+                const btn = cont.querySelector('#goQuery')
+                btn.addEventListener('click', (e) => {
+                    const vv = e.target.parentNode.querySelectorAll('input');
+                    const val1 = vv[0].value;
+                    const val2 = vv[1].value;
+
+                    load(`getAll/people where birthYear>=${val1} and birthYear<=${val2} order by birthYear asc `).then((r) => {
+                        createTable(r);
+                    })
+
+                })
+            } else {
+                const min = second == 'yearReleased' ? 1984 : second == 'rating' ? 1 : 60;
+                const max = second == 'yearReleased' ? 2025 : second == 'rating' ? 10 : 1400;
+                const step = second == 'rating' ? .2 : 1;
+
+                const cont = createinBetweenQuery(min, max, step)
+                sel.parentNode.append(cont);
+                const btn = cont.querySelector('#goQuery')
+                btn.addEventListener('click', (e) => {
+                    const vv = e.target.parentNode.querySelectorAll('input');
+                    const val1 = vv[0].value;
+                    const val2 = vv[1].value;
+                    const byVal = second=='yearReleased' ? 'startYear' : second=='runTime' ? second : second=='rating' && main=='movie' ? 'r.rating' :  'round(rating,2)'
+
+                    const qry = `getTypeBetween/${main}/${byVal}/${val1}/${val2}`
+                    load(qry).then((r) => {
+                        createTable(r);
+                    })
+
+                })
+
+            }
+        }
+    })
 }
 
 
