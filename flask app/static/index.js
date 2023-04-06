@@ -7,16 +7,16 @@ function init() {
 
 
         if (main.value != 'people') {
-            const secondSel = createSelection(main.value, ['all', 'byTitle', 'yearReleased', 'genre', 'rating'])
+            const secondSel = createSelection(main.value, ['all', 'byTitle', 'yearReleased', 'genre'])
 
-            if (main.value == 'tvSeries') secondSel.innerHTML += '<option value="hasEnded">is Completed</option>'
-            else if (main.value == 'movie') secondSel.innerHTML += '<option value="runTime">by Run-Time</option>'
+            if (main.value == 'tvSeries') secondSel.innerHTML += '<option value="hasEnded">Completed</option> <option value="onGoing">on Going</option>'
+            else if (main.value == 'movie') secondSel.innerHTML += '<option value="runTime">by Run-Time</option> <option value="rating">By Rating</option>'
 
             document.querySelector('.qSelects').append(secondSel)
             secondOnChange(secondSel)
 
         } else {
-            const secondSel = createSelection(main.value, ['all', 'byName', 'birthYear', 'isAlive', 'byProfession'])
+            const secondSel = createSelection(main.value, ['all', 'byName', 'birthYear', 'isAlive', 'hasPassedAway','byProfession'])
             document.querySelector('.qSelects').append(secondSel)
             secondOnChange(secondSel)
         }
@@ -59,6 +59,13 @@ function secondOnChange(second) {
 
         } else if (second.value == 'all') {
             processAllRequest(main.value)
+        } else if (['yearReleased','birthYear'].includes(second.value)){
+           const sel = createSelection(second.value, ['yearEquals', 'yearBefore', 'yearAfter','yearBetween'])
+            
+        } else if(['isAlive','hasPassedAway'].includes(second.value)){
+            const wht = second.value=='isAlive' ? 'null' : 'not null'
+            const q = `people where deathYear is ${wht} order by birthYear`
+            load(`/getAll/${q}`).then((r)=>{createTable(r)})
         }
 
     });
@@ -67,13 +74,19 @@ function secondOnChange(second) {
 
 function processAllRequest(mValue) {
     const qry = {
-        titles: "titles where fType in ('movie','tvSeries') order by startYear",
-        movie: "titles where fType in ('movie') order by startYear",
-        tvSeries: "titles where fType in ('tvSeries')",
-        people: "people order by birthYear"
+        titles: "/getAll/titles where fType in ('movie','tvSeries') order by startYear",
+        movie:  `get/t.* , m.runTime, r.rating from titles t 
+        join movies m on t.tconst = m.tconst  join ratings r on t.tconst = r.tconst order by t.startYear`,
+        tvSeries: `get/ titles.*, tv.endYear, round(rating, 2)
+        from(titles join  tvSeries tv on tv.tconst = titles.tconst join 
+                (select E.parent_tconst, avg(rating) as rating
+                from episodes E join ratings R ON R.tconst=E.tconst 
+                group by E.parent_tconst
+                order by parent_tconst desc) ON parent_tconst = titles.tconst)`,
+        people: "/getAll/people order by birthYear"
     };
 
-    load(`/getAll/${qry[mValue]}`).then((res) => {
+    load(`${qry[mValue]}`).then((res) => {
         createTable(res)
     })
 }
@@ -123,7 +136,10 @@ function processbyTitleORbyName (main,sec,sel){
                     createTable(res)
                 })
 
-
+            }else{
+                load(`getAll/people order by name ${q}`).then((res) => {
+                    createTable(res)
+                })
             }
 
         }else{document.querySelector('.qSelects').append(createAlph(main))}
@@ -190,7 +206,9 @@ function createTable(info) {
     slider.min = min;
     slider.value = currValue
     slider.step = 1
-
+    const numShowing = document.createElement('p')
+    numShowing.setAttribute('class','showingResult')
+    numShowing.innerText = `Showing ${slider.value} Results`
     
     
     count = 0
@@ -206,6 +224,7 @@ function createTable(info) {
     slider.addEventListener('change', (e) => {
         const len = indexList
         console.log(slider.value)
+        const resultShow = document.querySelector('.showingResult')
         const tableBody = document.querySelector('tbody')
         const newtBody = document.createElement('tbody')
         let count = 0
@@ -218,11 +237,12 @@ function createTable(info) {
             if (count > slider.value) break;
         }
 
+        resultShow.innerText = `Showing ${slider.value} Results`
         tableBody.replaceWith(newtBody)
     })
 
     table.append(tableHead, tableBody)
-    currDiv.append(slider, table)
+    currDiv.append(numShowing,slider, table)
 }
 }
 
@@ -259,7 +279,7 @@ window.addEventListener('load', init)
 
 // create custom Alph button:
 function createAlph(main) {
-    const d = document.createElement('span')
+    const d = document.createElement('div')
     d.setAttribute('class', 'subSelection')
     d.innerHTML = `<p id="alph">A</p>
                     <span class="btnGroup">

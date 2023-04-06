@@ -68,6 +68,30 @@ def test(varb):
     
     return result
 
+@app.route('/get/<varb>', methods=['POST'])
+def get(varb):
+    conn = sqlite3.connect(dbPath,uri=True)
+    cursor = conn.cursor()
+
+    try:
+        result = list()
+        res = cursor.execute(f" select {varb}")
+        names = [description[0] for description in cursor.description]
+
+        first = res.fetchone();
+        if first is not None:
+            result.append(names)
+            result.append(first)
+            for r in res.fetchall():
+                result.append(r)
+        else:
+            result =  ['No result found']
+
+    except:
+        result =  ['No result found'] , 400
+    
+    return result
+
 
 def readInput(input):
     data = input.split('+')

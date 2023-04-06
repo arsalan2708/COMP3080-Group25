@@ -11,7 +11,7 @@ select * from tvSeries;
 
 --RATING QUERIES--
 -- display all movies in order of highest to lowest rating  
-select title, rating
+select T.tconst,fType, title, rating
 from ((titles T JOIN movies S ON T.tconst = S.tconst) join ratings R ON R.tconst = T.tconst)
 order by rating desc; 
 
