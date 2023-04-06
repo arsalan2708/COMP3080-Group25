@@ -132,7 +132,6 @@ def getKnownFor(nconst):
     from people P JOIN actors A ON P.nconst = A.nconst
     join titles T on T.tconst = A.tconst
     where A.nconst = '{nconst}' '''
-    print(q)
     return outQuery(q);
 
 
@@ -160,19 +159,17 @@ select E.parent_tconst as tconst, round(avg(rating),2) as rating
 @app.route('/workedWith/<nconst>', methods=["POST"])
 def workedWith(nconst):
     q= f''' with alljobs as (select tconst, nconst from actors
-UNION
-select tconst, nconst from crew)
+            UNION
+            select tconst, nconst from crew)
 
-select distinct name
+select distinct Z.nconst, name
 from alljobs join people Z on alljobs.nconst = Z.nconst
 where Z.nconst != '{nconst}' and alljobs.tconst IN (
     select A.tconst
-    from (((people P JOIN alljobs A ON P.nconst = A.nconst) 
-    join tvSeries M ON M.tconst = A.tconst) 
-    join titles T on T.tconst = M.tconst)
+    from (((people P JOIN alljobs A ON P.nconst = A.nconst) ) 
+    join titles T on T.tconst = A.tconst)
     where A.nconst = '{nconst}' )
 order by name asc; '''
-
     return outQuery(q)
     
 

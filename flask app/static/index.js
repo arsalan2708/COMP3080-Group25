@@ -388,10 +388,10 @@ function putLifeIn(row, data, prevCont) {
 
 
         if (data[1].includes('nm')) {
-            alert(`clicked: (${data[1]}) -> ${data[2]} ${data[4]}`)
+            //alert(`clicked: (${data[1]}) -> ${data[2]} ${data[4]}`)
             content.append(createPersonTab(data[1],data[2], data[3], data[4]))
         } else{
-            alert(`clicked: (${data}`)
+            // alert(`clicked: (${data}`)
             content.append(createMediaTab(data[1],data[2], data[3], data[5]))
         }
     })
@@ -408,7 +408,7 @@ function createPersonTab(nconst,name,birthYear,deathYear) {
     const d = deathYear=='null' ? 'Present' : deathYear
     cont.setAttribute('class', 'PersonInfo')
     cont.innerHTML = `<span>    <h2>${name}</h2> <p> <span>${birthYear}</span> - <span>${d}</span>  </p>
-    <a href= https://www.imdb.com/name/${nconst} > <p id="imdbLink"> IMDb</p> </a> </span>
+    <p id="imdbLink" onclick= "openTab('https://www.imdb.com/name/${nconst}')" > IMDb</p> </span>
 
     <div class="known4"> <h4 id="knownWorks">Known Works of ${name}</h4> </div>
     <div class="peopleWorked"> <h4 id="workedWith"> ${name} worked with </h4> </div>`
@@ -427,7 +427,7 @@ function createMediaTab(tconst,fType,title,releasedYear){
     const cont = document.createElement('div')
     cont.setAttribute('class', 'title')
     cont.innerHTML = `<span>    <h2>${title}</h2> <p> <span>${releasedYear}</span>  </p>
-    <a href= https://www.imdb.com/title/${tconst} > <p id="imdbLink"> IMDb</p> </a> </span>
+    <p id="imdbLink" onclick= "openTab('https://www.imdb.com/title/${tconst}')" > IMDb</p> </span>
 
     <div class="known4"> <h4 id="knownWorks">Crew and Cast</h4> </div>
     ${fType=='tvSeries' ? '<div class="peopleWorked"> <h4 id="workedWith"> List of Episodes </h4> </div>' :''}`
@@ -635,6 +635,10 @@ function load(url) {
 
         reject(new Error('Error No results found'))
     })
+}
+
+function openTab(lnk){
+    window.open(lnk)
 }
 
 
