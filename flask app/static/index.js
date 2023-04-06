@@ -292,7 +292,9 @@ function numMatchInp(main, second, sel) {
                 })
             } else {
                 if (second == 'yearReleased') {
-                    const min = main == 'tvSeries' ? (sel.value == 'before' ? 1998 : 1994) : (sel.value == 'before' ? 1986 : 1984)
+
+                    console.log('yearReleased')
+                    const min = main == 'tvSeries' ? (sel.value == 'before' ? 1998 : 1993) : (sel.value == 'before' ? 1986 : 1984)
                     const max = main == 'tvSeries' ? (sel.value == 'after' ? 2019 : 2023) : (sel.value == 'after' ? 2019 : 2025)
                     const cont = createSimpleNum(min, max, 2)
                     sel.parentNode.append(cont);
@@ -302,18 +304,32 @@ function numMatchInp(main, second, sel) {
                         const type = sel.value == 'equal' ? '=' : sel.value == 'before' ? '<' : '>'
                         const value = e.target.parentNode.querySelector('input').value
 
-                        const qry = {
-                            titles: `/getAll/titles where fType in ('movie','tvSeries') and startYear ${type} ${value} order by startYear`,
-                            movie: `getAll/titles  where fType='movie' and  startYear ${type} ${value} order by startYear`,
-                            tvSeries: `getAll/ titles where fType='tvSeries' and startYear ${type} ${value} order by startYear`}
-
-
-
-                        console.log(`${qry[main]}`)   
-                        load(`${qry[main]}`).then((r) => { createTable(r); })
+                        const qry = main =='titles' ? `/getAll/titles where fType in ('movie','tvSeries') and 
+                        startYear ${type} ${value} order by startYear` : `getType/${main}/${'startYear'}/${type}/${value}`
+ 
+                        load(`${qry}`).then((r) => { createTable(r); })
 
                     });
-                }
+                } else if (second== 'rating'){
+                        const min = sel.value =='before' ? 3 : 1;
+                        const max = sel.value == 'after' ? 8 : 10;
+                        const cont = createSimpleNum(min, max, .2)
+                        sel.parentNode.append(cont);
+
+                        const btn = cont.querySelector('#goQuery');
+                        btn.addEventListener('click', (e) => {
+                        const type = sel.value == 'equal' ? '=' : sel.value == 'before' ? '<' : '>'
+                        const value = e.target.parentNode.querySelector('input').value
+                        const byVal = main=='movie' ? 'r.rating' : 'round(rating,2)'
+                        console.log(byVal)
+
+                        const qry = `getType/${main}/${byVal}/${type}/${value}`
+ 
+                        load(`${qry}`).then((r) => { createTable(r); })
+
+                    });
+
+                    }
             }
                 
         }else {
