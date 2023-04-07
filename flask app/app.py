@@ -117,7 +117,6 @@ def getEpList(tconst):
             from episodes E full outer join titles T ON E.tconst = t.tconst
             where parent_tconst = '{tconst}'
             order by season, epNo; '''
-    print(q)
     return outQuery(q);
 
 

@@ -373,12 +373,9 @@ function numMatchInp(main, second, sel) {
 }
 
 
-function putLifeIn(row, consT, prevCont) {
+function putLifeIn(row, consT, prevCont,isEp=false) {
     row.addEventListener('click', () => {
-        emptyMainBody();
-        removeSubSelects('all')
-        document.querySelector('#main').value = 'null';
-        const content = document.querySelector('.content')
+       
         
         // const backButton = document.createElement('button')
         // backButton.setAttribute('class','backBtn')
@@ -386,14 +383,22 @@ function putLifeIn(row, consT, prevCont) {
         // backButton.addEventListener('click', () => { content.replaceWith(prevCont) })
         // content.append(backButton)
 
+        if(isEp)
+            openTab(`https://www.imdb.com/title/${consT}`)
+        else{ 
+            emptyMainBody();
+            removeSubSelects('all')
+            document.querySelector('#main').value = 'null';
+            const content = document.querySelector('.content')
 
-        if (consT.includes('nm')) {
+            if (consT.includes('nm')) {
             //alert(`clicked: (${consT}) -> ${data[2]} ${data[4]}`)
             createPersonTab(content, consT)
         } else{
             // alert(`clicked: (${data}`)
             createMediaTab(content,consT)
         }
+    }
     })
 
 }
@@ -407,7 +412,7 @@ async function createPersonTab(pCont,nconst) {
     const [nc,name,birthYear,deathYear] = info[0]
     
     const cont = document.createElement('div')
-    const d = deathYear=='null' ? 'Present' : deathYear
+    const d = deathYear== null ? 'Present' : deathYear
     cont.setAttribute('class', 'PersonInfo')
     cont.innerHTML = `<span>
     <h2>${name}</h2>
@@ -486,8 +491,7 @@ function createSmallTable(info,isEpisode=false){
         for (r of info) {
             row = document.createElement('tr')
             for (c of indexList) row.innerHTML += `<td>${r[c]}</td>`
-            if(!isEpisode)
-                putLifeIn(row,r[1],null)
+                putLifeIn(row,r[1],null,isEpisode)
             tableBody.append(row)
         }
 
