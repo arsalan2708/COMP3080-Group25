@@ -18,6 +18,7 @@ If unsuccessful after attempting the instructions above, open with Spyder by run
 ```
 \COMP3080-Group25-\flask app
 ```
+To explore the database, toggle through the drop down menus. Clicking on movies/TV shows and people will generate more results pertaining to that title/person. 
 
 # Group members:
 
