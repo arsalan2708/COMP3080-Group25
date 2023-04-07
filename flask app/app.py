@@ -126,12 +126,13 @@ def getKnownFor(nconst):
     q = f'''select T.tconst as tconst, fType, title, T.startYear as releasedYear
             from people P JOIN crew A ON P.nconst = A.nconst
     join titles T on T.tconst = A.tconst
-    where A.nconst = '{nconst}'
+    where A.nconst = '{nconst}' and T.fType in ('movie','tvSeries') 
     UNION
-    select T.tconst, fType, title , T.startYear 
+    select T.tconst, fType, title , T.startYear as realeasedYear
     from people P JOIN actors A ON P.nconst = A.nconst
     join titles T on T.tconst = A.tconst
-    where A.nconst = '{nconst}' '''
+    where A.nconst = '{nconst}' and T.fType in ('movie','tvSeries') '''
+    print(q)
     return outQuery(q);
 
 

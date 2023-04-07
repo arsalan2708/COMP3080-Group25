@@ -450,7 +450,7 @@ async function createMediaTab(pCont,tconst){
     if(data[1]=='tvSeries'){
 
         const pplWorkedWith = cont.querySelector('.peopleWorked')
-        load(`listEp/${tconst}`).then((r)=>{pplWorkedWith.append(createSmallTable(r)) })
+        load(`listEp/${tconst}`).then((r)=>{pplWorkedWith.append(createSmallTable(r,true)) })
 
     }
 
@@ -458,7 +458,7 @@ async function createMediaTab(pCont,tconst){
 }
 
 
-function createSmallTable(info){
+function createSmallTable(info,isEpisode=false){
     if (info == 'No result found') {
         return document.createTextNode(info[0] + '!')
     }
@@ -486,7 +486,8 @@ function createSmallTable(info){
         for (r of info) {
             row = document.createElement('tr')
             for (c of indexList) row.innerHTML += `<td>${r[c]}</td>`
-            putLifeIn(row,r[1],null)
+            if(!isEpisode)
+                putLifeIn(row,r[1],null)
             tableBody.append(row)
         }
 
