@@ -118,11 +118,12 @@ input[type=range]{
 }
 
 
-.PersonInfo h2:first-of-type, .PersonInfo p:first-of-type{
+.PersonInfo  span h2, .PersonInfo span p{
     display: inline;
 }
 
 #imdbLink{
+    display: block;
     padding: .2rem 1rem;
     background-color: rgb(39, 39, 39);
     font-size: small;
@@ -137,10 +138,4 @@ input[type=range]{
 #imdbLink:hover{
     background-color: rgb(255, 174, 0);
     color: rgb(0, 0, 0);
-}
-
-a{
-    display: block;
-    margin-top: 4px;
-    text-decoration: none;
 }

@@ -223,7 +223,7 @@ function createTable(info) {
         for (r of info) {
             row = document.createElement('tr')
             for (c of indexList) row.innerHTML += `<td>${r[c]}</td>`
-            putLifeIn(row, r, currDiv)
+            putLifeIn(row, r[1], currDiv)
             tableBody.append(row)
             count++;
             if (count > slider.value) break;
@@ -239,7 +239,7 @@ function createTable(info) {
             for (r of info) {
                 row = document.createElement('tr')
                 for (c of len) row.innerHTML += `<td>${r[c]}</td>`
-                putLifeIn(row, r, currDiv)
+                putLifeIn(row, r[1], currDiv)
                 newtBody.append(row)
                 count++;
                 if (count > slider.value) break;
@@ -373,7 +373,7 @@ function numMatchInp(main, second, sel) {
 }
 
 
-function putLifeIn(row, data, prevCont) {
+function putLifeIn(row, consT, prevCont) {
     row.addEventListener('click', () => {
         emptyMainBody();
         removeSubSelects('all')
@@ -387,12 +387,12 @@ function putLifeIn(row, data, prevCont) {
         // content.append(backButton)
 
 
-        if (data[1].includes('nm')) {
-            //alert(`clicked: (${data[1]}) -> ${data[2]} ${data[4]}`)
-            content.append(createPersonTab(data[1],data[2], data[3], data[4]))
+        if (consT.includes('nm')) {
+            //alert(`clicked: (${consT}) -> ${data[2]} ${data[4]}`)
+            createPersonTab(content, consT)
         } else{
             // alert(`clicked: (${data}`)
-            content.append(createMediaTab(data[1],data[2], data[3], data[5]))
+            createMediaTab(content,consT)
         }
     })
 
@@ -402,12 +402,16 @@ function putLifeIn(row, data, prevCont) {
 
 
 
-function createPersonTab(nconst,name,birthYear,deathYear) {
-
+async function createPersonTab(pCont,nconst) {
+    const info = await load(`/getPersonInfo/${nconst}`)
+    const [nc,name,birthYear,deathYear] = info[0]
+    
     const cont = document.createElement('div')
     const d = deathYear=='null' ? 'Present' : deathYear
     cont.setAttribute('class', 'PersonInfo')
-    cont.innerHTML = `<span>    <h2>${name}</h2> <p> <span>${birthYear}</span> - <span>${d}</span>  </p>
+    cont.innerHTML = `<span>
+    <h2>${name}</h2>
+     <p> <span>${birthYear}</span> - <span>${d}</span>  </p>
     <p id="imdbLink" onclick= "openTab('https://www.imdb.com/name/${nconst}')" > IMDb</p> </span>
 
     <div class="known4"> <h4 id="knownWorks">Known Works of ${name}</h4> </div>
@@ -415,40 +419,46 @@ function createPersonTab(nconst,name,birthYear,deathYear) {
 
     const known4 = cont.querySelector('.known4')
     load(`knownFor/${nconst}`).then((r)=>{known4.append(createSmallTable(r)) })
+    
     const pplWorkedWith = cont.querySelector('.peopleWorked')
-
     load(`workedWith/${nconst}`).then((r)=>{pplWorkedWith.append(createSmallTable(r))})
 
-    return cont
+    pCont.append(cont)
 }
 
 
-function createMediaTab(tconst,fType,title,releasedYear){
+async function createMediaTab(pCont,tconst){
+    const i = await load(`getTimeStamp/${tconst}`)
+    const data = i[0];
+
     const cont = document.createElement('div')
-    cont.setAttribute('class', 'title')
-    cont.innerHTML = `<span>    <h2>${title}</h2> <p> <span>${releasedYear}</span>  </p>
+    cont.setAttribute('class', 'PersonInfo')
+    cont.innerHTML = `<span>
+    <h2>${data[0]}</h2> 
+    <p> <span>${data[2]}</span>  </p>
     <p id="imdbLink" onclick= "openTab('https://www.imdb.com/title/${tconst}')" > IMDb</p> </span>
 
-    <div class="known4"> <h4 id="knownWorks">Crew and Cast</h4> </div>
-    ${fType=='tvSeries' ? '<div class="peopleWorked"> <h4 id="workedWith"> List of Episodes </h4> </div>' :''}`
+    <div class="known4"> <h4 id="knownWorks">Cast and Crew</h4> </div>
+    ${data[1]=='tvSeries' ? '<div class="peopleWorked"> <h4 id="workedWith"> List of Episodes </h4> </div>' :''}`
 
-    const known4 = cont.querySelector('.known4')
-    load(`actorsFor/${fType}/${tconst}`).then((r)=>{known4.append(createSmallTable(r)) })
-    load(`crewFor/${fType}/${tconst}`).then((r)=>{known4.append(createSmallTable(r)) })
     
-    if(fType=='tvSeries'){
+    
+    const known4 = cont.querySelector('.known4')
+    await load(`actorsFor/${data[1]}/${tconst}`).then((r)=>{known4.append(createSmallTable(r)) })
+    await load(`crewFor/${data[1]}/${tconst}`).then((r)=>{ if(r.length>1) known4.append(createSmallTable(r)) })
+    
+    if(data[1]=='tvSeries'){
 
         const pplWorkedWith = cont.querySelector('.peopleWorked')
         load(`listEp/${tconst}`).then((r)=>{pplWorkedWith.append(createSmallTable(r)) })
 
     }
 
-    return cont;
+    pCont.append(cont)
 }
 
 
 function createSmallTable(info){
-    console.log(info)
     if (info == 'No result found') {
         return document.createTextNode(info[0] + '!')
     }
@@ -476,6 +486,7 @@ function createSmallTable(info){
         for (r of info) {
             row = document.createElement('tr')
             for (c of indexList) row.innerHTML += `<td>${r[c]}</td>`
+            putLifeIn(row,r[1],null)
             tableBody.append(row)
         }
 
@@ -639,6 +650,14 @@ function load(url) {
 
 function openTab(lnk){
     window.open(lnk)
+}
+
+
+async function yellow(){
+
+    const h = await load(`getAll/people where nconst = 'nm0000866' `)
+    console.log(h);
+
 }
 
 

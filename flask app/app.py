@@ -123,26 +123,34 @@ def getEpList(tconst):
 
 @app.route('/knownFor/<nconst>', methods=['POST'])
 def getKnownFor(nconst):
-    q = f'''select T.tconst as tconst, title, T.startYear as releasedYear
+    q = f'''select T.tconst as tconst, fType, title, T.startYear as releasedYear
             from people P JOIN crew A ON P.nconst = A.nconst
     join titles T on T.tconst = A.tconst
     where A.nconst = '{nconst}'
     UNION
-    select T.tconst, title , T.startYear 
+    select T.tconst, fType, title , T.startYear 
     from people P JOIN actors A ON P.nconst = A.nconst
     join titles T on T.tconst = A.tconst
     where A.nconst = '{nconst}' '''
     return outQuery(q);
 
 
-@app.route('/calcTvRating/<tconst>', methods=['POST'])
-def getCalcRating(tconst):
-    q= f'''select rating from(
+@app.route('/getRating/<format>/<tconst>', methods=['POST'])
+def getCalcRating(format,tconst):
+    q1= f'''select rating from(
 select E.parent_tconst as tconst, round(avg(rating),2) as rating 
         from episodes E 
         join ratings R ON R.tconst=E.tconst 
         group by E.parent_tconst
         order by parent_tconst desc ) where tconst = '{tconst}' '''
+
+    q2 = f'''select  (case
+    when count(rating) = 0 
+    then 'un-rated'
+    else rating
+    end) as rating from ratings where tconst = '{tconst}' '''
+
+    q = q1 if format=='tvSeries' else q2
     
     conn = sqlite3.connect(dbPath,uri=True)
     cursor = conn.cursor()
@@ -150,6 +158,51 @@ select E.parent_tconst as tconst, round(avg(rating),2) as rating
     result = list()
     for r in res.fetchall():
         result.append(r[0])
+
+    cursor.close()
+    conn.close()
+    return result
+
+@app.route('/getTimeStamp/<tconst>', methods=['POST'])
+def getTimeStamp(tconst):
+    q= f''' 
+    with timeStamp as (
+select T.tconst,T.title, T.fType, T.startYear , tv.endYear from titles T
+full outer join tvSeries tv on tv.tconst = T.tconst
+where fType in ('movie','tvSeries')
+)
+
+select title, fType, ( case when fType ='tvSeries'
+        then   (case
+    when endYear=0
+    then startYear || ' - Present'
+    else startYear || ' - ' || endYear end)
+    else startYear
+end) as timeFrame from timeStamp where tconst = '{tconst}'
+    '''
+    
+    conn = sqlite3.connect(dbPath,uri=True)
+    cursor = conn.cursor()
+    res= cursor.execute(q)
+    result = list()
+    for r in res.fetchall():
+        result.append(r)
+
+    cursor.close()
+    conn.close()
+    return result
+
+
+@app.route('/getPersonInfo/<nconst>', methods=['POST'])
+def getPInfo(nconst):
+    q= f''' select * from people where nconst = '{nconst}' '''
+    
+    conn = sqlite3.connect(dbPath,uri=True)
+    cursor = conn.cursor()
+    res= cursor.execute(q)
+    result = list()
+    for r in res.fetchall():
+        result.append(r);
 
     cursor.close()
     conn.close()
