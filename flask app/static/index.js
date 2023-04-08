@@ -133,6 +133,7 @@ function processbyTitleORbyName(main, sec, sel) {
 
     sel.addEventListener('change', (e) => {
         const selVal = e.target.value;
+        removeSubSelects('last',sel)
 
         if (selVal != 'startingWith') {
             const q = selVal == 'ascending' ? 'asc' : 'desc'
@@ -444,7 +445,7 @@ async function createMediaTab(pCont,tconst){
     <p id="imdbLink" onclick= "openTab('https://www.imdb.com/title/${tconst}')" > IMDb</p> </span>
 
     <div class="known4"> <h4 id="knownWorks">Cast and Crew</h4> </div>
-    ${data[1]=='tvSeries' ? '<div class="peopleWorked"> <h4 id="workedWith"> List of Episodes </h4> </div>' :''}`
+    ${data[1]=='tvSeries' ? '<div class="peopleWorked"> <h4 id="workedWith"> List of Episodes</h4> <div id="loader"></div> </div>' :''}`
 
     
     
@@ -455,7 +456,10 @@ async function createMediaTab(pCont,tconst){
     if(data[1]=='tvSeries'){
 
         const pplWorkedWith = cont.querySelector('.peopleWorked')
-        load(`listEp/${tconst}`).then((r)=>{pplWorkedWith.append(createSmallTable(r,true)) })
+        const loader = pplWorkedWith.parentNode.querySelector('#loader')
+        load(`listEp/${tconst}`).then((r)=>{
+            loader.parentNode.removeChild(loader)
+            pplWorkedWith.append(createSmallTable(r,true)) })
 
     }
 

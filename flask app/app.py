@@ -113,8 +113,11 @@ def getcrewFor(typ,tconst):
 
 @app.route('/listEp/<tconst>', methods=['POST'])
 def getEpList(tconst):
-    q = f''' select E.tconst, title, season, epNo as episodeNumber, runTime
+    q = f''' select E.tconst, (case when T.title is null then 'Un-Released' else T.title end) as title
+            , season, epNo as episodeNumber, (case when runTime is null then 'unKnown' else runTime end) as runTime,
+             (case when R.rating is null then 'N/A' else R.rating end) as rating
             from episodes E full outer join titles T ON E.tconst = t.tconst
+            full outer join ratings R on E.tconst = R.tconst
             where parent_tconst = '{tconst}'
             order by season, epNo; '''
     return outQuery(q);
@@ -256,8 +259,8 @@ def outQuery(q):
     return result
 
 
-if __name__ == '__main__' :
-    webbrowser.open('http://127.0.0.1:2708/')
-    app.run(debug=True,port=2708, host='0.0.0.0')
+
+webbrowser.open('http://127.0.0.1:2708/')
+app.run(debug=True,port=2708, host='0.0.0.0')
 
 print("\nprogram execution complete!")

@@ -1,7 +1,8 @@
 body{font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;}
 
 .subSelection{
-    display:flex;
+    display: flex;
+    gap: .5rem;
 }
 
 .btnGroup{
@@ -16,6 +17,7 @@ body{font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida
     max-width: 50vw;
     flex-wrap: nowrap;
     gap: 5px;
+    align-items: center;
 }
 
 .btnGroup button{
@@ -42,9 +44,8 @@ body{font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida
 #spanContainer button{margin: 0;}
 
 #alph{
-    height: 1rem;
-    width:2rem;
-    padding: .1rem.2rem;
+    max-width:3rem;
+    padding: .15rem .3rem;
     border: 1px solid black;
     text-align: center;
     border-radius: .1rem;
@@ -52,7 +53,7 @@ body{font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida
 
 .qTable{
     border-collapse: collapse;
-    margin: 25px 0;
+    margin: 10px 0;
     font-size: .9em;
     min-width: 400px;
     max-width: 75%;
@@ -74,7 +75,7 @@ body{font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida
 .qTable tbody tr{
     font-size: .8em; 
     border-bottom: 1px solid #dddddd ;
-    transition: .1s ease;
+    transition: color 150ms linear;
 }
 
 .qTable tbody tr:nth-of-type(even){ background-color: rgb(238, 249, 253);}
@@ -86,25 +87,30 @@ body{font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida
     cursor: pointer;
     }
 
-.qTable{
-    margin-bottom: 50px;
-}
 
 .showingResult{
     display: inline;
+    margin-right: 10px ;
 }
+
 input[type=range]{
     display: inline;
-    min-width: 250px;
-    width : 30%;
-    max-width: 500px;
+    min-width: 200px;
+    width : 25%;
+    max-width: 350px;
+}
+
+#main, .qSelects select, .qSelects input{
+    font-size: medium;
+    padding: .2rem;
 }
 
 .conBody{
     display: flex;
     flex-flow: column;
     gap:10px;
-    margin : 1% 5%;
+    margin : 1% 2%;
+    max-width: 65vw;
 }
 
 
@@ -121,6 +127,8 @@ input[type=range]{
 .PersonInfo  span h2, .PersonInfo span p{
     display: inline;
 }
+
+
 
 #imdbLink{
     display: block;
@@ -139,3 +147,50 @@ input[type=range]{
     background-color: rgb(255, 174, 0);
     color: rgb(0, 0, 0);
 }
+
+
+.known4 table , .peopleWorked table{
+    position: relative;
+    margin-top: 0;
+    margin-bottom: 30px;
+}
+
+.peopleWorked{
+    display: flex;
+    flex-flow: column;
+    align-items: start;
+}
+
+
+
+
+
+
+#loader{
+    display: flex;
+    position: relative;
+    top : 10px;
+    left: 65px;
+    justify-content: center;
+    align-items: center;
+    transition: opacity .75s, visibility .75s;
+   }
+
+  #loader::after{
+    content:"";
+    max-width: 35px;
+    min-width: 15px;
+    aspect-ratio: 1;
+    border: .35em solid rgba(16, 0, 160, 0.082);
+    border-top-color: rgb(8, 91, 146);
+    border-radius: 46%;
+    animation: loading 1s cubic-bezier(0.29, 0.95, 0.665, .7) infinite;
+  }
+
+  @keyframes loading { from{
+    transform: rotate(0turn);
+  }
+  to{
+    transform: rotate(1turn);
+  }  
+  }
