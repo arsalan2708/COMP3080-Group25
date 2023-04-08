@@ -207,17 +207,41 @@ input[type=range]{
   }
 
   .header:hover{
-    background-color: #e9c545;
+    background-color: #f1e976;
   }
 
   .attributes{margin-left:1px ; margin-top: 0; color:grey; user-select: none;}
   .attribute{
     display: inline;
     font-size: x-small;
+    position: relative;
     margin: 0;
+    border-bottom: 2px solid rgba(128, 0, 0, 0) ;
+    transition: color 200ms ease;
+    cursor:pointer;
   }
 
-  .bullet{font-weight: 700; margin: 0 .5rem;  }
+  .attribute:hover{
+    color: maroon;
+  }
+
+  .attribute:hover:after{
+    bottom:-1px;
+    background-color: maroon;
+  }
+
+  .attribute:after{
+    content:'';
+    position: absolute;
+    width: 100%;
+    background-color: rgba(128, 0, 0, 0);
+    height: 1px;
+    bottom: -5px;
+    left: 0;
+    transition: all 200ms linear;
+  }
+
+  .bullet{font-weight: 700; margin: 0 .5rem;  color:lightgray;}
 
   #rate{
     margin-left: 1rem;

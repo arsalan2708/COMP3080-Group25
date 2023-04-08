@@ -133,7 +133,7 @@ function processbyTitleORbyName(main, sec, sel) {
 
     sel.addEventListener('change', (e) => {
         const selVal = e.target.value;
-        removeSubSelects('last',sel)
+        removeSubSelects('last', sel)
 
         if (selVal != 'startingWith') {
             const q = selVal == 'ascending' ? 'asc' : 'desc'
@@ -374,32 +374,45 @@ function numMatchInp(main, second, sel) {
 }
 
 
-function putLifeIn(row, consT, prevCont,isEp=false) {
+function putLifeIn(row, consT, prevCont, isEp = false) {
     row.addEventListener('click', () => {
-       
-        
+
+
         // const backButton = document.createElement('button')
         // backButton.setAttribute('class','backBtn')
         // backButton.innerText = 'Go Back'
         // backButton.addEventListener('click', () => { content.replaceWith(prevCont) })
         // content.append(backButton)
 
-        if(isEp)
+        if (isEp)
             openTab(`https://www.imdb.com/title/${consT}`)
-        else{ 
+        else {
             emptyMainBody();
             removeSubSelects('all')
             document.querySelector('#main').value = 'null';
             const content = document.querySelector('.content')
 
             if (consT.includes('nm')) {
-            //alert(`clicked: (${consT}) -> ${data[2]} ${data[4]}`)
-            createPersonTab(content, consT)
-        } else{
-            // alert(`clicked: (${data}`)
-            createMediaTab(content,consT)
+                //alert(`clicked: (${consT}) -> ${data[2]} ${data[4]}`)
+                createPersonTab(content, consT).then(()=>{
+                    const att = content.querySelectorAll('.attribute')
+                    att.forEach(e=>{
+                        e.addEventListener('click' ,()=>{ load(`/getByAttri/people/${e.innerText}`).then(r=>createTable(r))    })
+                    });
+                })
+
+            } else {
+                // alert(`clicked: (${data}`)
+                createMediaTab(content, consT).then(()=>{
+                    const att = content.querySelectorAll('.attribute')
+                    att.forEach(e=>{
+                        e.addEventListener('click' ,()=>{ load(`/getByAttri/titles/${e.innerText}`).then(r=>createTable(r))   })
+                    });
+                })
+            }
+
+           
         }
-    }
     })
 
 }
@@ -408,35 +421,35 @@ function putLifeIn(row, consT, prevCont,isEp=false) {
 
 
 
-async function createPersonTab(pCont,nconst) {
+async function createPersonTab(pCont, nconst) {
     const info = await load(`/getPersonInfo/${nconst}`)
-    const [nc,name,birthYear,deathYear] = info[0]
-    
+    const [nc, name, birthYear, deathYear] = info[0]
+
     const attr = await createGP(nconst)
 
     const cont = document.createElement('div')
-    const d = deathYear== null ? 'Present' : deathYear
+    const d = deathYear == null ? 'Present' : deathYear
     cont.setAttribute('class', 'PersonInfo')
     cont.innerHTML = `<span>
     <h2>${name}</h2>
      <p> <span>${birthYear}</span> - <span>${d}</span>  </p>`
-    cont.append(attr) 
-    cont.innerHTML+=`<p id="imdbLink" onclick= "openTab('https://www.imdb.com/name/${nconst}')" > IMDb</p> </span>
+    cont.append(attr)
+    cont.innerHTML += `<p id="imdbLink" onclick= "openTab('https://www.imdb.com/name/${nconst}')" > IMDb</p> </span>
 
     <div class="known4"> <h4 id="knownWorks">Known Works of ${name}</h4> </div>
     <div class="peopleWorked"> <h4 id="workedWith"> ${name} worked with </h4> </div>`
 
     const known4 = cont.querySelector('.known4')
-    load(`knownFor/${nconst}`).then((r)=>{known4.append(createSmallTable(r)) })
-    
+    load(`knownFor/${nconst}`).then((r) => { known4.append(createSmallTable(r)) })
+
     const pplWorkedWith = cont.querySelector('.peopleWorked')
-    load(`workedWith/${nconst}`).then((r)=>{pplWorkedWith.append(createSmallTable(r))})
+    load(`workedWith/${nconst}`).then((r) => { pplWorkedWith.append(createSmallTable(r)) })
 
     pCont.append(cont)
 }
 
 
-async function createMediaTab(pCont,tconst){
+async function createMediaTab(pCont, tconst) {
     const i = await load(`getTimeStamp/${tconst}`)
     const data = i[0];
     const attr = await createGP(tconst)
@@ -448,44 +461,45 @@ async function createMediaTab(pCont,tconst){
     <h2>${data[0]}</h2> 
     <p> <span>${data[2]}</span> </p> <span id='rate'> ${rating[0]}</span> `
     cont.append(attr)
-    cont.innerHTML+=`<p id="imdbLink" onclick= "openTab('https://www.imdb.com/title/${tconst}')" > IMDb</p>  </span>
+    cont.innerHTML += `<p id="imdbLink" onclick= "openTab('https://www.imdb.com/title/${tconst}')" > IMDb</p>  </span>
 
     <div class="known4"> <h4 id="knownWorks">Cast and Crew</h4> </div>
-    ${data[1]=='tvSeries' ? '<div class="peopleWorked"> <h4 id="workedWith"> List of Episodes</h4> <div id="loader"></div> </div>' :''}`
+    ${data[1] == 'tvSeries' ? '<div class="peopleWorked"> <h4 id="workedWith"> List of Episodes</h4> <div id="loader"></div> </div>' : ''}`
 
-    
-    
+
+
     const known4 = cont.querySelector('.known4')
-    await load(`actorsFor/${data[1]}/${tconst}`).then((r)=>{known4.append(createSmallTable(r)) })
-    await load(`crewFor/${data[1]}/${tconst}`).then((r)=>{ if(r.length>1) known4.append(createSmallTable(r)) })
-    
-    if(data[1]=='tvSeries'){
+    await load(`actorsFor/${data[1]}/${tconst}`).then((r) => { known4.append(createSmallTable(r)) })
+    await load(`crewFor/${data[1]}/${tconst}`).then((r) => { if (r.length > 1) known4.append(createSmallTable(r)) })
+
+    if (data[1] == 'tvSeries') {
 
         const pplWorkedWith = cont.querySelector('.peopleWorked')
         const loader = pplWorkedWith.parentNode.querySelector('#loader')
-        load(`listEp/${tconst}`).then((r)=>{
+        load(`listEp/${tconst}`).then((r) => {
             loader.parentNode.removeChild(loader)
-            pplWorkedWith.append(createSmallTable(r,true)) })
+            pplWorkedWith.append(createSmallTable(r, true))
+        })
 
     }
 
     pCont.append(cont)
 }
 
-async function createGP(id){
+async function createGP(id) {
     const info = await load(`getAttri/${id}`)
     const container = document.createElement('p')
-    container.setAttribute('class','attributes')
+    container.setAttribute('class', 'attributes')
 
-    for( let i=0 ; i<info.length-1;i++)
+    for (let i = 0; i < info.length - 1; i++)
         container.innerHTML += `<span class="attribute">${info[i]}</span> <span class='bullet'>&bull;</span>`
-    container.innerHTML += `<span class="attribute">${info[info.length-1]}</span>`
+    container.innerHTML += `<span class="attribute">${info[info.length - 1]}</span>`
 
     return container
 }
 
 
-function createSmallTable(info,isEpisode=false){
+function createSmallTable(info, isEpisode = false) {
     if (info == 'No result found') {
         return document.createTextNode(info[0] + '!')
     }
@@ -513,7 +527,7 @@ function createSmallTable(info,isEpisode=false){
         for (r of info) {
             row = document.createElement('tr')
             for (c of indexList) row.innerHTML += `<td>${r[c]}</td>`
-                putLifeIn(row,r[1],null,isEpisode)
+            putLifeIn(row, r[1], null, isEpisode)
             tableBody.append(row)
         }
 
@@ -552,20 +566,20 @@ function createAlph(main) {
     const d = document.createElement('div')
     d.setAttribute('class', 'subSelection')
     d.setAttribute('id', 'spanContainer')
-    d.innerHTML =  `    <input type='text' maxLength = "6" value='A' id="alph" /> 
+    d.innerHTML = `    <input type='text' maxLength = "6" value='A' id="alph" /> 
                         <button id='queryGo'> Query! </button>
                     `
 
     const alph = d.querySelector('#alph');
-    alph.addEventListener('keydown', (e)=>{
-        const invalid = ['drop','create','replace','delete','grant all']
-        if (e.key==';'){
+    alph.addEventListener('keydown', (e) => {
+        const invalid = ['drop', 'create', 'replace', 'delete', 'grant all']
+        if (e.key == ';') {
             e.preventDefault()
-            alert('; is not allowed' )
+            alert('; is not allowed')
         }
         invalid.forEach(element => {
             const val = e.target.value
-            if(val.toLowerCase().includes(element)){
+            if (val.toLowerCase().includes(element)) {
                 alert(`must not include ${element} for input`)
                 e.target.value = 'BAD'
             }
@@ -588,7 +602,7 @@ function logicAlph(main, d) {
 
         const nType = main != 'titles' ? `fType in ('${main}')` : `fType in ('movie','tvSeries') `
         const sType = main != 'people' ? `${nType} and title` : 'name';
-        const orderBy = main == 'people' ? 'name': 'title'
+        const orderBy = main == 'people' ? 'name' : 'title'
 
         const qry = `${type} where ${sType} like '${val.value}%' order by ${orderBy}`
 
@@ -671,7 +685,7 @@ function load(url) {
     })
 }
 
-function openTab(lnk){
+function openTab(lnk) {
     window.open(lnk)
 }
 

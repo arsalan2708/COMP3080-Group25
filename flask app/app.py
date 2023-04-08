@@ -227,12 +227,13 @@ def idInfo(const):
     conn.close()
     return result
 
-@app.route('/getByAttri/<type>/<reqVal>')
+@app.route('/getByAttri/<typ>/<reqVal>', methods=["POST"])
 def byAttri (typ,reqVal):
-    q1= f''' select * from titles where fType in ('movie','tvSeries') and tconst in (select genre from genres where genre='{reqVal}')  order by startYear ''';
-    q2= f''' select * people where nconst in (select distinct nconst from profession where profession = '{reqVal} ''';
+    q1= f''' select * from titles where fType in ('movie','tvSeries') and tconst in (select tconst from genres where genre='{reqVal}')  order by startYear ''';
+    q2= f''' select * from people where nconst in (select distinct nconst from profession where profession = '{reqVal}')  ''';
 
     q = q2 if ('people' in typ) else q1 
+    print(q)
     return outQuery(q)
 
    
