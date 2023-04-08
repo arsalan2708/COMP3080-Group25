@@ -84,7 +84,7 @@ function processAllRequest(mValue) {
         titles: "/getAll/titles where fType in ('movie','tvSeries') order by startYear",
         movie: `get/t.* , m.runTime, r.rating from titles t 
         join movies m on t.tconst = m.tconst  join ratings r on t.tconst = r.tconst order by t.startYear`,
-        tvSeries: `get/ titles.*, tv.endYear, round(rating, 2)
+        tvSeries: `get/ titles.*, tv.endYear, round(rating, 2) as rating
         from(titles join  tvSeries tv on tv.tconst = titles.tconst join 
                 (select E.parent_tconst, avg(rating) as rating
                 from episodes E join ratings R ON R.tconst=E.tconst 
@@ -412,13 +412,16 @@ async function createPersonTab(pCont,nconst) {
     const info = await load(`/getPersonInfo/${nconst}`)
     const [nc,name,birthYear,deathYear] = info[0]
     
+    const attr = await createGP(nconst)
+
     const cont = document.createElement('div')
     const d = deathYear== null ? 'Present' : deathYear
     cont.setAttribute('class', 'PersonInfo')
     cont.innerHTML = `<span>
     <h2>${name}</h2>
-     <p> <span>${birthYear}</span> - <span>${d}</span>  </p>
-    <p id="imdbLink" onclick= "openTab('https://www.imdb.com/name/${nconst}')" > IMDb</p> </span>
+     <p> <span>${birthYear}</span> - <span>${d}</span>  </p>`
+    cont.append(attr) 
+    cont.innerHTML+=`<p id="imdbLink" onclick= "openTab('https://www.imdb.com/name/${nconst}')" > IMDb</p> </span>
 
     <div class="known4"> <h4 id="knownWorks">Known Works of ${name}</h4> </div>
     <div class="peopleWorked"> <h4 id="workedWith"> ${name} worked with </h4> </div>`
@@ -436,13 +439,16 @@ async function createPersonTab(pCont,nconst) {
 async function createMediaTab(pCont,tconst){
     const i = await load(`getTimeStamp/${tconst}`)
     const data = i[0];
+    const attr = await createGP(tconst)
+    const rating = await load(`/getRating/${data[1]}/${tconst}`)
 
     const cont = document.createElement('div')
     cont.setAttribute('class', 'PersonInfo')
     cont.innerHTML = `<span>
     <h2>${data[0]}</h2> 
-    <p> <span>${data[2]}</span>  </p>
-    <p id="imdbLink" onclick= "openTab('https://www.imdb.com/title/${tconst}')" > IMDb</p> </span>
+    <p> <span>${data[2]}</span> </p> <span id='rate'> ${rating[0]}</span> `
+    cont.append(attr)
+    cont.innerHTML+=`<p id="imdbLink" onclick= "openTab('https://www.imdb.com/title/${tconst}')" > IMDb</p>  </span>
 
     <div class="known4"> <h4 id="knownWorks">Cast and Crew</h4> </div>
     ${data[1]=='tvSeries' ? '<div class="peopleWorked"> <h4 id="workedWith"> List of Episodes</h4> <div id="loader"></div> </div>' :''}`
@@ -464,6 +470,18 @@ async function createMediaTab(pCont,tconst){
     }
 
     pCont.append(cont)
+}
+
+async function createGP(id){
+    const info = await load(`getAttri/${id}`)
+    const container = document.createElement('p')
+    container.setAttribute('class','attributes')
+
+    for( let i=0 ; i<info.length-1;i++)
+        container.innerHTML += `<span class="attribute">${info[i]}</span> <span class='bullet'>&bull;</span>`
+    container.innerHTML += `<span class="attribute">${info[info.length-1]}</span>`
+
+    return container
 }
 
 
@@ -534,13 +552,25 @@ function createAlph(main) {
     const d = document.createElement('div')
     d.setAttribute('class', 'subSelection')
     d.setAttribute('id', 'spanContainer')
-    d.innerHTML = `<p id="alph">A</p>
-                    <span class="btnGroup">
-                        <button>+</button>
-                        <button>-</button>
-                    </span>
+    d.innerHTML =  `    <input type='text' maxLength = "6" value='A' id="alph" /> 
                         <button id='queryGo'> Query! </button>
                     `
+
+    const alph = d.querySelector('#alph');
+    alph.addEventListener('keydown', (e)=>{
+        const invalid = ['drop','create','replace','delete','grant all']
+        if (e.key==';'){
+            e.preventDefault()
+            alert('; is not allowed' )
+        }
+        invalid.forEach(element => {
+            const val = e.target.value
+            if(val.toLowerCase().includes(element)){
+                alert(`must not include ${element} for input`)
+                e.target.value = 'BAD'
+            }
+        });
+    })
 
     logicAlph(main, d)
     return d;
@@ -550,23 +580,7 @@ function createAlph(main) {
 
 function logicAlph(main, d) {
     const alph = d.querySelector('#alph')
-    const btn = d.querySelector('.btnGroup').children
     const qBtn = d.querySelector('#queryGo')
-
-    btn[0].addEventListener('click', () => {
-        const chrCode = alph.innerText.charCodeAt(0);
-        if (chrCode < 90) {
-            alph.innerText = String.fromCharCode(chrCode + 1);
-        }
-
-    })
-
-    btn[1].addEventListener('click', () => {
-        const chrCode = alph.innerText.charCodeAt(0);
-        if (chrCode > 65) {
-            alph.innerText = String.fromCharCode(chrCode - 1);
-        }
-    })
 
     qBtn.addEventListener('click', () => {
         const val = d.querySelector('#alph')
@@ -576,7 +590,7 @@ function logicAlph(main, d) {
         const sType = main != 'people' ? `${nType} and title` : 'name';
         const orderBy = main == 'people' ? 'name': 'title'
 
-        const qry = `${type} where ${sType} like '${val.innerText}%' order by ${orderBy}`
+        const qry = `${type} where ${sType} like '${val.value}%' order by ${orderBy}`
 
         load(`/getAll/${qry}`).then((res) => {
             createTable(res)
@@ -661,12 +675,5 @@ function openTab(lnk){
     window.open(lnk)
 }
 
-
-async function yellow(){
-
-    const h = await load(`getAll/people where nconst = 'nm0000866' `)
-    console.log(h);
-
-}
 
 

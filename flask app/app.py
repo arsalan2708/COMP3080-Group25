@@ -159,7 +159,7 @@ select E.parent_tconst as tconst, round(avg(rating),2) as rating
     res= cursor.execute(q)
     result = list()
     for r in res.fetchall():
-        result.append(r[0])
+        result.append(r[0]);
 
     cursor.close()
     conn.close()
@@ -183,32 +183,14 @@ select title, fType, ( case when fType ='tvSeries'
 end) as timeFrame from timeStamp where tconst = '{tconst}'
     '''
     
-    conn = sqlite3.connect(dbPath,uri=True)
-    cursor = conn.cursor()
-    res= cursor.execute(q)
-    result = list()
-    for r in res.fetchall():
-        result.append(r)
-
-    cursor.close()
-    conn.close()
-    return result
+    return outQuerysimple(q)
 
 
 @app.route('/getPersonInfo/<nconst>', methods=['POST'])
 def getPInfo(nconst):
     q= f''' select * from people where nconst = '{nconst}' '''
+    return outQuerysimple(q)
     
-    conn = sqlite3.connect(dbPath,uri=True)
-    cursor = conn.cursor()
-    res= cursor.execute(q)
-    result = list()
-    for r in res.fetchall():
-        result.append(r);
-
-    cursor.close()
-    conn.close()
-    return result
 
 
 @app.route('/workedWith/<nconst>', methods=["POST"])
@@ -226,9 +208,45 @@ where Z.nconst != '{nconst}' and alljobs.tconst IN (
     where A.nconst = '{nconst}' )
 order by name asc; '''
     return outQuery(q)
+
+@app.route('/getAttri/<const>', methods=["POST"])
+def idInfo(const):
+    q1 = f''' select genre from genres where tconst= '{const}' '''
+    q2 = f''' select profession from profession where nconst= '{const}' '''
     
+    q = q2 if ('nm' in const) else q1 
+
+    conn = sqlite3.connect(dbPath,uri=True)
+    cursor = conn.cursor()
+    res= cursor.execute(q)
+    result = list()
+    for r in res.fetchall():
+        result.append(r[0]);
+
+    cursor.close()
+    conn.close()
+    return result
+
+@app.route('/getByAttri/<type>/<reqVal>')
+def byAttri (typ,reqVal):
+    q1= f''' select * from titles where fType in ('movie','tvSeries') and tconst in (select genre from genres where genre='{reqVal}')  order by startYear ''';
+    q2= f''' select * people where nconst in (select distinct nconst from profession where profession = '{reqVal} ''';
+
+    q = q2 if ('people' in typ) else q1 
+    return outQuery(q)
 
    
+def outQuerysimple(q):
+    conn = sqlite3.connect(dbPath,uri=True)
+    cursor = conn.cursor()
+    res= cursor.execute(q)
+    result = list()
+    for r in res.fetchall():
+        result.append(r);
+
+    cursor.close()
+    conn.close()
+    return result
 
 
 def outQuery(q):

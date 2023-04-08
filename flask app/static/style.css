@@ -14,10 +14,11 @@ body{font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida
 .qSelects{
     display: flex;
     flex-flow: row;
-    max-width: 50vw;
-    flex-wrap: nowrap;
+    flex-wrap:wrap;
     gap: 5px;
     align-items: center;
+    background-color: rgb(80, 92, 104);
+    padding: .5rem .2rem;
 }
 
 .btnGroup button{
@@ -44,19 +45,17 @@ body{font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida
 #spanContainer button{margin: 0;}
 
 #alph{
-    max-width:3rem;
+    max-width: 5rem;
     padding: .15rem .3rem;
     border: 1px solid black;
-    text-align: center;
     border-radius: .1rem;
 }
 
 .qTable{
     border-collapse: collapse;
+    font-size: min(3vw,1rem);
+    width: 100%;;
     margin: 10px 0;
-    font-size: .9em;
-    min-width: 400px;
-    max-width: 75%;
     max-height: 75vh;
     border-radius: 5px 5px 0 0;
     overflow :hidden;
@@ -109,8 +108,9 @@ input[type=range]{
     display: flex;
     flex-flow: column;
     gap:10px;
-    margin : 1% 2%;
-    max-width: 65vw;
+    margin : 1% 0;
+    margin-inline: auto;
+    max-width: min(90%,65rem);
 }
 
 
@@ -157,8 +157,7 @@ input[type=range]{
 
 .peopleWorked{
     display: flex;
-    flex-flow: column;
-    align-items: start;
+    flex-wrap: wrap;
 }
 
 
@@ -193,4 +192,39 @@ input[type=range]{
   to{
     transform: rotate(1turn);
   }  
+  }
+
+  .header{
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    font-size: larger;
+    text-align: center;
+    user-select: none;
+    background-color: #e2b616;
+    color: black;
+    padding: .5rem 0;
+    cursor: pointer;
+    transition: background-color .4s ease;
+  }
+
+  .header:hover{
+    background-color: #e9c545;
+  }
+
+  .attributes{margin-left:1px ; margin-top: 0; color:grey; user-select: none;}
+  .attribute{
+    display: inline;
+    font-size: x-small;
+    margin: 0;
+  }
+
+  .bullet{font-weight: 700; margin: 0 .5rem;  }
+
+  #rate{
+    margin-left: 1rem;
+    font-size: x-small;
+    color: slategrey;
+  }
+
+  #rate::before{
+    content: "Rating: ";
   }
